@@ -1,6 +1,15 @@
+import React from "react"
+
 export function StorySection() {
   return (
-    <section className="bg-black py-16 px-4 md:py-24">
+    <section 
+      className="py-16 px-4 md:py-24"
+      style={{
+        background: `linear-gradient(0deg, #000000, #000000),
+          linear-gradient(0deg, rgba(0, 0, 0, 0.54), rgba(0, 0, 0, 0.54)),
+          linear-gradient(179.13deg, rgba(0, 0, 0, 0.54) 0.81%, rgba(255, 255, 255, 0) 99.32%)`
+      }}
+    >
       <div className="container mx-auto max-w-6xl">
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950">
           <div className="grid md:grid-cols-2 items-center">

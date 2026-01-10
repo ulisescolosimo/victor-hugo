@@ -1,4 +1,5 @@
 import { Play, Youtube } from "lucide-react"
+import Image from "next/image"
 
 export default function Footer() {
   return (
@@ -8,8 +9,13 @@ export default function Footer() {
           {/* Left Side */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 mb-4">
-              <Play className="w-5 h-5 text-white fill-white" />
-              <span className="text-xl font-bold text-white">RELATORXS</span>
+              <Image
+                src="/images/Rectangle 873.png"
+                alt="RELATORXS"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+              />
             </div>
             <p className="text-white/80 text-sm">VHM al mundial</p>
             <p className="text-white/60 text-xs">© 2025. Todos los derechos reservados.</p>
@@ -60,4 +66,5 @@ export default function Footer() {
     </footer>
   )
 }
+
 

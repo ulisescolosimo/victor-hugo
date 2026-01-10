@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 export function Header() {
   return (
     <header className="absolute top-0 left-0 right-0 z-50">
@@ -5,10 +7,14 @@ export function Header() {
         <div className="flex items-center justify-between py-6">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <div className="h-8 w-8 rounded bg-gradient-to-br from-pink-500 to-purple-600" />
-              <span className="text-xl font-bold text-white">RELATOR×S</span>
-            </div>
+            <Image
+              src="/images/Rectangle 873.png"
+              alt="RELATOR×S"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
           </div>
 
           {/* Navigation Links */}
