@@ -3,28 +3,28 @@ import Image from "next/image"
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1a1a1a] py-12 md:py-16 border-t border-white/10">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 md:gap-0">
+    <footer className="bg-[#1a1a1a] py-10 sm:py-12 md:py-16 border-t border-white/10">
+      <div className="container mx-auto px-4 sm:px-6 md:px-4 max-w-6xl">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 sm:gap-10 md:gap-0">
           {/* Left Side */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <Image
                 src="/images/Rectangle 873.png"
                 alt="RELATORXS"
                 width={120}
                 height={40}
-                className="h-8 w-auto"
+                className="h-6 sm:h-7 md:h-8 w-auto"
               />
             </div>
             <p className="text-white/80 text-sm">VHM al mundial</p>
-            <p className="text-white/60 text-xs">© 2025. Todos los derechos reservados.</p>
+            <p className="text-white/60 text-xs">© 2026. Todos los derechos reservados.</p>
           </div>
 
           {/* Right Side */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="flex flex-col items-start sm:items-end justify-end md:items-end gap-5 sm:gap-6 w-full sm:w-auto">
             {/* Links */}
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-4 sm:gap-6">
               <a href="#" className="text-white/80 hover:text-white text-sm transition-colors">
                 Términos y condiciones
               </a>
@@ -34,24 +34,24 @@ export default function Footer() {
             </div>
 
             {/* Social Media Icons */}
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4">
               {/* YouTube */}
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center hover:bg-red-700 transition-colors"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-600 flex items-center justify-center hover:bg-red-700 transition-colors touch-manipulation active:scale-95"
                 aria-label="YouTube"
               >
-                <Play className="w-5 h-5 text-white fill-white" />
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 text-white fill-white" />
               </a>
 
               {/* Instagram */}
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center hover:from-purple-700 hover:to-pink-700 transition-colors"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center hover:from-purple-700 hover:to-pink-700 transition-colors touch-manipulation active:scale-95"
                 aria-label="Instagram"
               >
                 <svg
-                  className="w-5 h-5 text-white fill-white"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-white fill-white"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
