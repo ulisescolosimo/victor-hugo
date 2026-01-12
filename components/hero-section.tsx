@@ -14,7 +14,7 @@ export function HeroSection() {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   }
@@ -27,7 +27,7 @@ export function HeroSection() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   }
@@ -40,7 +40,7 @@ export function HeroSection() {
       x: 0,
       transition: {
         duration: 1,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1] as const,
         delay: 0.3,
       },
     },
@@ -65,7 +65,7 @@ export function HeroSection() {
       x: 0,
       transition: {
         duration: 0.4,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   }
@@ -118,14 +118,15 @@ export function HeroSection() {
                   transition={{ delay: 0.2 }}
                 >
                   Llevemos a <strong>Victor Hugo</strong> al Mundial 2026. Financiado por los oyentes.{" "}
+                  <br className="block sm:hidden" />
                   <strong>Producido por el pueblo.</strong>
                 </motion.p>
 
                 {/* CTA Buttons */}
-                <div className="mb-8 sm:mb-9 md:mb-10 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
+                <div className="mb-8 sm:mb-9 md:mb-10 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto px-6 sm:px-8 text-white uppercase hover:opacity-90 text-base sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium"
+                    className="w-auto min-w-[200px] sm:w-auto px-6 sm:px-8 text-white uppercase hover:opacity-90 text-base sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium"
                     style={{
                       background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                       fontFamily: 'Montserrat, sans-serif',
@@ -137,7 +138,7 @@ export function HeroSection() {
                     size="lg"
                     variant="outline"
                     asChild
-                    className="w-full sm:w-auto border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-6 sm:px-8 uppercase text-base sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
+                    className="w-auto min-w-[200px] sm:w-auto border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-6 sm:px-8 uppercase text-base sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
                     style={{
                       fontFamily: 'Montserrat, sans-serif',
                     }}
@@ -169,19 +170,40 @@ export function HeroSection() {
                     <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shrink-0">
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-sm sm:text-sm md:text-base text-white">Aportes verificados</span>
+                    <span 
+                      className="text-sm sm:text-sm md:text-base text-white"
+                      style={{
+                        textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)'
+                      }}
+                    >
+                      Aportes verificados
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shrink-0">
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-sm sm:text-sm md:text-base text-white">Reembolsable si no se alcanza la Fase 1</span>
+                    <span 
+                      className="text-sm sm:text-sm md:text-base text-white"
+                      style={{
+                        textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)'
+                      }}
+                    >
+                      Reembolsable si no se alcanza la Fase 1
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shrink-0">
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-sm sm:text-sm md:text-base text-white">Transparencia en tiempo real</span>
+                    <span 
+                      className="text-sm sm:text-sm md:text-base text-white"
+                      style={{
+                        textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)'
+                      }}
+                    >
+                      Transparencia en tiempo real
+                    </span>
                   </div>
                 </div>
               </div>
@@ -190,14 +212,14 @@ export function HeroSection() {
         </div>
 
       {/* Right Image - Posicionada relativo a la sección completa, pegada al fondo */}
-      {/* Mobile: oculta, Tablet: visible con ajuste, Desktop: posición original */}
+      {/* Mobile: visible, Tablet: visible con ajuste, Desktop: posición original */}
       <motion.div
-        className="absolute bottom-0 z-20 hidden md:block md:right-0 lg:right-[-60px] w-full md:w-2/3 lg:w-3/4"
+        className="absolute bottom-0 z-20 right-[-60%] md:right-0 lg:right-[-60px] w-[180%] md:w-2/3 lg:w-3/4"
         initial="hidden"
         animate="visible"
         variants={imageVariants}
       >
-        <div className="relative w-full h-[60vh] md:h-[70vh] lg:h-[100vh] min-h-[60vh] md:min-h-[70vh] lg:min-h-[100vh]">
+        <div className="relative w-full h-[95vh] sm:h-[85vh] md:h-[70vh] lg:h-[100vh] min-h-[95vh] sm:min-h-[85vh] md:min-h-[70vh] lg:min-h-[100vh]">
           <Image
             src="/images/victor-hugo-microphone.png"
             alt="Victor Hugo con micrófono"
@@ -206,6 +228,8 @@ export function HeroSection() {
             style={{ objectPosition: "bottom right" }}
             priority
           />
+          {/* Overlay oscuro solo en mobile */}
+          <div className="absolute inset-0 bg-black/25 md:bg-transparent pointer-events-none"></div>
         </div>
       </motion.div>
     </section>
