@@ -427,7 +427,7 @@ export default function ObjectivesParticipationSection() {
 
         {/* Cuántos somos para llegar */}
         <motion.div
-          className="mb-12 sm:mb-16 md:mb-20"
+          className="mb-4"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
