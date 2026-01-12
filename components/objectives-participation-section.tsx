@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { ChevronUp, ChevronDown } from "lucide-react"
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
@@ -262,7 +262,8 @@ export default function ObjectivesParticipationSection() {
                     aria-label="Decrementar cantidad"
                     className="flex items-center justify-center w-6 h-6 md:w-6 md:h-6 rounded text-white transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent touch-manipulation"
                   >
-                    <ChevronDown className="w-3 h-3 md:w-3 md:h-3" />
+                    <ChevronLeft className="w-3 h-3 md:w-3 md:h-3 md:hidden" />
+                    <ChevronDown className="w-3 h-3 md:w-3 md:h-3 hidden md:block" />
                   </button>
                   <div className="flex flex-col items-center gap-0 min-w-[45px] md:min-w-[45px]">
                     <Input
@@ -281,9 +282,9 @@ export default function ObjectivesParticipationSection() {
                         else if (val > 10) handleQuantityChange(10)
                       }}
                       aria-label="Cantidad de aportes"
-                      className="w-10 md:w-10 h-7 md:h-7 text-center text-white text-sm md:text-sm font-semibold bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none p-0"
+                      className="w-10 md:w-10 h-7 md:h-7 text-center text-white text-lg md:text-sm font-semibold bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none p-0"
                     />
-                    <span className="text-white/60 text-[9px] md:text-[9px] font-normal leading-tight">
+                    <span className="text-white/60 text-md md:text-[9px] font-normal leading-tight">
                       {quantity === 1 ? 'aporte' : 'aportes'}
                     </span>
                   </div>
@@ -293,7 +294,8 @@ export default function ObjectivesParticipationSection() {
                     aria-label="Incrementar cantidad"
                     className="flex items-center justify-center w-6 h-6 md:w-6 md:h-6 rounded text-white transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent touch-manipulation"
                   >
-                    <ChevronUp className="w-3 h-3 md:w-3 md:h-3" />
+                    <ChevronRight className="w-3 h-3 md:w-3 md:h-3 md:hidden" />
+                    <ChevronUp className="w-3 h-3 md:w-3 md:h-3 hidden md:block" />
                   </button>
                 </div>
                 <Button 

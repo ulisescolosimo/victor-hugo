@@ -71,7 +71,7 @@ export function HeroSection() {
   }
   return (
     <section
-      className="relative w-full overflow-hidden bg-black bg-cover bg-center bg-no-repeat min-h-[100vh] sm:min-h-screen"
+      className="relative w-full overflow-hidden bg-black bg-cover bg-center bg-no-repeat min-h-[80vh] sm:min-h-screen"
       style={{
         backgroundImage: "url(/images/stadium-background.jpg)",
       }}
@@ -85,7 +85,7 @@ export function HeroSection() {
       ></motion.div>
       
       {/* Content Container */}
-      <div className="relative z-50 flex flex-col min-h-[100vh] sm:min-h-screen pt-16 sm:pt-20 md:pt-24 lg:pt-0 lg:h-[90vh] lg:min-h-[90vh]">
+      <div className="relative z-50 flex flex-col min-h-[85vh] sm:min-h-screen pt-16 sm:pt-20 md:pt-24 lg:pt-0 lg:h-[90vh] lg:min-h-[90vh]">
         {/* Hero Content */}
         <div className="relative flex flex-1 justify-center items-center sm:items-end pb-0 h-full">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-6xl w-full pb-8 sm:pb-12 md:pb-16 lg:pb-16 self-center sm:self-end">
