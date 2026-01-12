@@ -57,7 +57,8 @@ export function StorySection() {
 
   return (
     <section 
-      className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8"
+      id="sobre-proyecto"
+      className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8 scroll-mt-20"
       style={{
         background: `linear-gradient(0deg, #000000, #000000),
           linear-gradient(0deg, rgba(0, 0, 0, 0.54), rgba(0, 0, 0, 0.54)),

@@ -125,4 +125,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Mejorar el scroll suave en navegadores que lo soportan */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 }

@@ -136,12 +136,30 @@ export function HeroSection() {
                   <Button
                     size="lg"
                     variant="outline"
+                    asChild
                     className="w-full sm:w-auto border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-6 sm:px-8 uppercase text-base sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
                     style={{
                       fontFamily: 'Montserrat, sans-serif',
                     }}
                   >
-                    Cómo funciona
+                    <a 
+                      href="#como-funciona"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        const element = document.getElementById('como-funciona')
+                        if (element) {
+                          const headerOffset = 80
+                          const elementPosition = element.getBoundingClientRect().top
+                          const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                          window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                          })
+                        }
+                      }}
+                    >
+                      Cómo funciona
+                    </a>
                   </Button>
                 </div>
 

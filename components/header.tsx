@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react"
 import Image from "next/image"
 import { Menu, HelpCircle, DollarSign, Info, ChevronRight, X } from "lucide-react"
 import {
@@ -12,6 +13,35 @@ import {
 } from "@/components/ui/sheet"
 
 export function Header() {
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+
+  // Función para manejar el scroll suave
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string, closeMenu: boolean = false) => {
+    e.preventDefault()
+    
+    const scrollToElement = () => {
+      const element = document.getElementById(targetId)
+      if (element) {
+        const headerOffset = 80
+        const elementPosition = element.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+    }
+    
+    if (closeMenu) {
+      // Cerrar el menú primero
+      setIsSheetOpen(false)
+      // Pequeño delay para que el menú se cierre antes del scroll
+      setTimeout(scrollToElement, 300)
+    } else {
+      scrollToElement()
+    }
+  }
 
   return (
     <header className="absolute top-0 left-0 right-0 z-[60]">
@@ -31,20 +61,32 @@ export function Header() {
 
           {/* Desktop Navigation Links */}
           <div className="hidden items-center gap-8 lg:flex relative z-[60]">
-            <a href="#como-funciona" className="text-sm text-white transition-colors hover:text-pink-500">
+            <a 
+              href="#sobre-proyecto" 
+              onClick={(e) => handleSmoothScroll(e, 'sobre-proyecto')}
+              className="text-sm text-white transition-colors hover:text-pink-500"
+            >
+              Sobre el proyecto
+            </a>
+            <a 
+              href="#como-funciona" 
+              onClick={(e) => handleSmoothScroll(e, 'como-funciona')}
+              className="text-sm text-white transition-colors hover:text-pink-500"
+            >
               Cómo funciona
             </a>
-            <a href="#financiamiento" className="text-sm text-white transition-colors hover:text-pink-500">
+            <a 
+              href="#financiamiento" 
+              onClick={(e) => handleSmoothScroll(e, 'financiamiento')}
+              className="text-sm text-white transition-colors hover:text-pink-500"
+            >
               Financiamiento
-            </a>
-            <a href="#sobre-proyecto" className="text-sm text-white transition-colors hover:text-pink-500">
-              Sobre el proyecto
             </a>
           </div>
 
           {/* Mobile/Tablet Menu Hamburger */}
           <div className="lg:hidden relative z-[70]">
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <button
                   type="button"
@@ -62,6 +104,7 @@ export function Header() {
                 <div className="flex flex-col flex-1 overflow-y-auto min-h-0">
                   {/* Header mejorado con logo */}
                   <SheetHeader className="px-6 pt-5 pb-6 border-b border-white/10 bg-gradient-to-r from-pink-900/20 via-transparent to-purple-900/20 flex-shrink-0 relative">
+                    <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3 flex-1">
                         <Image
@@ -87,39 +130,9 @@ export function Header() {
 
                   {/* Navegación mejorada */}
                   <nav className="flex flex-col px-4 py-6 gap-2 flex-1">
-                  <SheetClose asChild>
-                    <a
-                      href="#como-funciona"
-                      className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
-                          <HelpCircle className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
-                        </div>
-                        <span className="font-medium">Cómo funciona</span>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
-                    </a>
-                  </SheetClose>
-                  
-                  <SheetClose asChild>
-                    <a
-                      href="#financiamiento"
-                      className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
-                          <DollarSign className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
-                        </div>
-                        <span className="font-medium">Financiamiento</span>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
-                    </a>
-                  </SheetClose>
-                  
-                  <SheetClose asChild>
                     <a
                       href="#sobre-proyecto"
+                      onClick={(e) => handleSmoothScroll(e, 'sobre-proyecto', true)}
                       className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
                     >
                       <div className="flex items-center gap-4">
@@ -130,7 +143,34 @@ export function Header() {
                       </div>
                       <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
                     </a>
-                  </SheetClose>
+                  
+                    <a
+                      href="#como-funciona"
+                      onClick={(e) => handleSmoothScroll(e, 'como-funciona', true)}
+                      className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
+                          <HelpCircle className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
+                        </div>
+                        <span className="font-medium">Cómo funciona</span>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
+                    </a>
+                  
+                    <a
+                      href="#financiamiento"
+                      onClick={(e) => handleSmoothScroll(e, 'financiamiento', true)}
+                      className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
+                          <DollarSign className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
+                        </div>
+                        <span className="font-medium">Financiamiento</span>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
+                    </a>
                   </nav>
                 </div>
 

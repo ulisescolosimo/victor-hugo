@@ -171,7 +171,8 @@ export default function ObjectivesParticipationSection() {
 
         {/* Cómo participar */}
         <motion.div
-          className="mb-12 sm:mb-16 md:mb-20"
+          id="como-funciona"
+          className="mb-12 sm:mb-16 md:mb-20 scroll-mt-20"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
@@ -307,7 +308,8 @@ export default function ObjectivesParticipationSection() {
 
           {/* Metas y Fases en dos columnas */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7 md:gap-8"
+            id="financiamiento"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7 md:gap-8 scroll-mt-20"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
