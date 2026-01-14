@@ -191,7 +191,7 @@ export default function ObjectivesParticipationSection() {
             Cómo participar?
           </motion.h2>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mb-12 sm:mb-16 md:mb-20 max-w-4xl"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mb-12 sm:mb-16 md:mb-20"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
@@ -282,9 +282,9 @@ export default function ObjectivesParticipationSection() {
                         else if (val > 10) handleQuantityChange(10)
                       }}
                       aria-label="Cantidad de aportes"
-                      className="w-10 md:w-10 h-7 md:h-7 text-center text-white text-lg md:text-sm font-semibold bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none p-0"
+                      className="w-10 md:w-10 h-7 md:h-7 text-center text-white text-lg md:text-[16px] font-semibold bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none p-0"
                     />
-                    <span className="text-white/60 text-md md:text-[9px] font-normal leading-tight">
+                    <span className="text-white/60 text-md md:text-[8px] font-normal leading-tight">
                       {quantity === 1 ? 'aporte' : 'aportes'}
                     </span>
                   </div>
@@ -434,7 +434,7 @@ export default function ObjectivesParticipationSection() {
           variants={fadeInUpVariants}
         >
           <motion.div
-            className="p-4 sm:p-5 md:p-6 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)] block w-full md:w-3/4"
+            className="p-4 sm:p-5 md:p-6 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)] block w-full"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -618,72 +618,58 @@ export default function ObjectivesParticipationSection() {
           </motion.div>
         </motion.div>
 
-        {/* Equipo y Produce */}
+        {/* Equipo */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5 md:gap-4 items-stretch"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
-          variants={staggerContainerVariants}
+          variants={slideInLeftVariants}
         >
-          {/* Equipo */}
-          <motion.div className="md:col-span-3" variants={slideInLeftVariants}>
-            <div className="rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)] p-4 sm:p-5 md:p-6 h-full flex flex-col">
-              <div className="flex items-center justify-between mb-6 sm:mb-7 md:mb-8 gap-4">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Equipo</h2>
-                <Image
-                  src="/images/Rectangle 873.png"
-                  alt="RELATORXS logo"
-                  width={120}
-                  height={40}
-                  className="h-6 sm:h-7 md:h-8 w-auto flex-shrink-0"
-                />
-              </div>
-              <motion.div
-                className="flex flex-wrap gap-3 sm:gap-4 justify-center sm:justify-between"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={staggerContainerVariants}
-              >
-                {[
-                  { firstName: "Alejandro", lastName: "Fabbri", image: "/images/alejandrofabbri.jpg" },
-                  { firstName: "Alejandro", lastName: "Apo", image: "/images/alejandroapo.png" },
-                  { firstName: "Viviana", lastName: "Vila", image: "/images/vivianavila.png" },
-                  { firstName: "Hernán", lastName: "Kodakian", image: "/images/kodakian.jpg" },
-                  { firstName: "Matías", lastName: "De Matteo", image: "/images/dematteo.png" },
-                  { firstName: "Néstor", lastName: "Centra", image: "/images/nestorcentra.png" },
-                ].map((person, index) => (
-                  <motion.div
-                    key={index}
-                    className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial min-w-[calc(50%-0.5rem)] sm:min-w-0 max-w-[120px] sm:max-w-none"
-                    variants={staggerItemVariants}
-                  >
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-24 rounded-full bg-gray-700 overflow-hidden border-2 border-white/20">
-                      <img src={person.image} alt={`${person.firstName} ${person.lastName}`} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-white text-sm sm:text-base font-semibold whitespace-pre-line">
-                        {person.firstName}
-                        {"\n"}
-                        {person.lastName}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
+          <div className="rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)] p-4 sm:p-5 md:p-6 h-full flex flex-col w-full">
+            <div className="flex items-center justify-between mb-6 sm:mb-7 md:mb-8 gap-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Equipo</h2>
+              <Image
+                src="/images/Rectangle 873.png"
+                alt="RELATORXS logo"
+                width={120}
+                height={40}
+                className="h-6 sm:h-7 md:h-8 w-auto flex-shrink-0"
+              />
             </div>
-          </motion.div>
-
-          {/* Produce */}
-          <motion.div className="md:col-span-1" variants={slideInRightVariants}>
-            <div className="rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)] p-4 sm:p-5 md:p-4 h-full flex flex-col">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 sm:mb-7 md:mb-8 sm:px-4 sm:px-6 md:px-8 pt-1 sm:pt-2">Produce</h2>
-              <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8">
-                <img src="/images/logo orsai.png" alt="Orsai" className="max-w-24 sm:max-w-28 h-auto pb-8 sm:pb-12 md:pb-16" />
-              </div>
-            </div>
-          </motion.div>
+            <motion.div
+              className="flex flex-wrap gap-3 sm:gap-4 justify-center sm:justify-between"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainerVariants}
+            >
+              {[
+                { firstName: "Alejandro", lastName: "Fabbri", image: "/images/alejandrofabbri.jpg" },
+                { firstName: "Alejandro", lastName: "Apo", image: "/images/alejandroapo.png" },
+                { firstName: "Viviana", lastName: "Vila", image: "/images/vivianavila.png" },
+                { firstName: "Hernán", lastName: "Kodakian", image: "/images/kodakian.jpg" },
+                { firstName: "Matías", lastName: "De Matteo", image: "/images/dematteo.png" },
+                { firstName: "Néstor", lastName: "Centra", image: "/images/nestorcentra.png" },
+              ].map((person, index) => (
+                <motion.div
+                  key={index}
+                  className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial min-w-[calc(50%-0.5rem)] sm:min-w-0 max-w-[120px] sm:max-w-none"
+                  variants={staggerItemVariants}
+                >
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-24 rounded-full bg-gray-700 overflow-hidden border-2 border-white/20">
+                    <img src={person.image} alt={`${person.firstName} ${person.lastName}`} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white text-sm sm:text-base font-semibold whitespace-pre-line">
+                      {person.firstName}
+                      {"\n"}
+                      {person.lastName}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>
