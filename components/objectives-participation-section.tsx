@@ -114,7 +114,7 @@ export default function ObjectivesParticipationSection() {
 
   return (
     <section 
-      className="relative py-12 sm:py-16 md:py-24 overflow-hidden"
+      className="relative py-12 px-4 sm:px-6 md:px-8 sm:py-16 md:py-24 overflow-hidden"
       style={{
         backgroundImage: 'url(/images/6ffec3ae67d9dfd1c670aff771877f0f15df6d1c.jpg)',
         backgroundSize: 'cover',
@@ -125,50 +125,7 @@ export default function ObjectivesParticipationSection() {
       {/* Overlay oscuro para legibilidad del texto */}
       <div className="absolute inset-0 bg-[#1a2e1a]/80 z-0"></div>
 
-      <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10 max-w-6xl">
-        {/* Objetivos del proyecto */}
-        <motion.div
-          className="mb-12 sm:mb-16 md:mb-20"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={fadeInUpVariants}
-        >
-          <motion.h2
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 sm:mb-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUpVariants}
-          >
-            Objetivos del proyecto
-          </motion.h2>
-          <motion.div
-            className="space-y-3 sm:space-y-4"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainerVariants}
-          >
-            {objectives.map((objective, index) => (
-              <motion.div
-                key={index}
-                className="p-3 sm:p-4 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)]"
-                variants={staggerItemVariants}
-              >
-                <p className="text-white text-sm sm:text-base md:text-lg leading-relaxed">
-                  {typeof objective === 'string' ? objective : (
-                    <>
-                      {objective.text}
-                      <strong>{objective.bold}</strong>
-                    </>
-                  )}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-
+      <div className="container mx-auto relative z-10 max-w-6xl">
         {/* Cómo participar */}
         <motion.div
           id="como-funciona"
@@ -188,7 +145,7 @@ export default function ObjectivesParticipationSection() {
             viewport={{ once: true }}
             variants={fadeInUpVariants}
           >
-            Cómo participar?
+            Cómo participar
           </motion.h2>
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mb-12 sm:mb-16 md:mb-20"
@@ -422,6 +379,49 @@ export default function ObjectivesParticipationSection() {
                 ))}
               </motion.div>
             </motion.div>
+          </motion.div>
+        </motion.div>
+
+        {/* Objetivos del proyecto */}
+        <motion.div
+          className="mb-12 sm:mb-16 md:mb-20"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeInUpVariants}
+        >
+          <motion.h2
+            className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 sm:mb-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUpVariants}
+          >
+            Objetivos del proyecto
+          </motion.h2>
+          <motion.div
+            className="space-y-3 sm:space-y-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerContainerVariants}
+          >
+            {objectives.map((objective, index) => (
+              <motion.div
+                key={index}
+                className="p-3 sm:p-4 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)]"
+                variants={staggerItemVariants}
+              >
+                <p className="text-white text-sm sm:text-base md:text-lg leading-relaxed">
+                  {typeof objective === 'string' ? objective : (
+                    <>
+                      {objective.text}
+                      <strong>{objective.bold}</strong>
+                    </>
+                  )}
+                </p>
+              </motion.div>
+            ))}
           </motion.div>
         </motion.div>
 

@@ -1,10 +1,21 @@
 "use client"
 
-import React from "react"
+import React, { useState, useRef } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { Play } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function StorySection() {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const handlePlay = () => {
+    if (videoRef.current) {
+      videoRef.current.play()
+      setIsPlaying(true)
+    }
+  }
   // Variantes de animación para la imagen
   const imageVariants = {
     hidden: { opacity: 0, x: -50 },
@@ -13,7 +24,7 @@ export function StorySection() {
       x: 0,
       transition: {
         duration: 0.8,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   }
@@ -26,7 +37,7 @@ export function StorySection() {
       x: 0,
       transition: {
         duration: 0.8,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   }
@@ -50,7 +61,7 @@ export function StorySection() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   }
@@ -112,9 +123,88 @@ export function StorySection() {
                   meta, llevar a Víctor Hugo y su equipo a los estadios.
                 </span>
               </motion.p>
+              
+              {/* CTA Buttons */}
+              <motion.div
+                className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-5"
+                variants={paragraphVariants}
+              >
+                <Button
+                  size="sm"
+                  className="w-full sm:w-auto min-w-[160px] px-4 sm:px-5 text-white uppercase hover:opacity-90 text-sm sm:text-base leading-[107%] tracking-normal font-medium"
+                  style={{
+                    background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
+                    fontFamily: 'Montserrat, sans-serif',
+                  }}
+                >
+                  Quiero aportar 18 USD
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="w-full sm:w-auto min-w-[160px] border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-4 sm:px-5 uppercase text-sm sm:text-base leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
+                  style={{
+                    fontFamily: 'Montserrat, sans-serif',
+                  }}
+                >
+                  <a 
+                    href="#como-funciona"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      const element = document.getElementById('como-funciona')
+                      if (element) {
+                        const headerOffset = 80
+                        const elementPosition = element.getBoundingClientRect().top
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                        window.scrollTo({
+                          top: offsetPosition,
+                          behavior: 'smooth'
+                        })
+                      }
+                    }}
+                  >
+                    Cómo funciona
+                  </a>
+                </Button>
+              </motion.div>
             </motion.div>
           </div>
         </div>
+
+        {/* Video local */}
+        <motion.div
+          className="mt-8 sm:mt-10 md:mt-12"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={textVariants}
+        >
+          <div className="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 shadow-2xl">
+            <video
+              ref={videoRef}
+              src="/video/videoplayback.mp4"
+              controls={isPlaying}
+              className="w-full h-full object-cover"
+              style={{ filter: "brightness(0.95) contrast(1.05)" }}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+            >
+              Tu navegador no soporta el elemento de video.
+            </video>
+            {!isPlaying && (
+              <button
+                onClick={handlePlay}
+                className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors duration-200 z-10"
+                aria-label="Reproducir video"
+              >
+                <div className="bg-black rounded-full p-4 sm:p-5 md:p-6 shadow-lg hover:scale-110 transition-transform duration-200">
+                  <Play className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white fill-white ml-1" />
+                </div>
+              </button>
+            )}
+          </div>
+        </motion.div>
       </div>
     </section>
   )
