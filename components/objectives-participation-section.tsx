@@ -124,6 +124,8 @@ export default function ObjectivesParticipationSection() {
     >
       {/* Overlay oscuro para legibilidad del texto */}
       <div className="absolute inset-0 bg-[#1a2e1a]/80 z-0"></div>
+      {/* Gradiente negro en la parte superior para continuar del componente anterior */}
+      <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black via-black/50 to-transparent z-[1] h-[200px] sm:h-[300px] md:h-[400px] pointer-events-none"></div>
 
       <div className="container mx-auto relative z-10 max-w-6xl">
         {/* Cómo participar */}
@@ -241,7 +243,7 @@ export default function ObjectivesParticipationSection() {
                       aria-label="Cantidad de aportes"
                       className="w-10 md:w-10 h-7 md:h-7 text-center text-white text-lg md:text-[16px] font-semibold bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none p-0"
                     />
-                    <span className="text-white/60 text-md md:text-[8px] font-normal leading-tight">
+                    <span className="text-white/60 text-md md:text-[10px] font-normal leading-tight">
                       {quantity === 1 ? 'aporte' : 'aportes'}
                     </span>
                   </div>

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
+import Project18Section from "@/components/project-18-section"
 
 export default function ContactSection() {
   // Variantes de animación
@@ -62,7 +63,11 @@ export default function ContactSection() {
   }
 
   return (
-    <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-24">
+    <>
+      {/* Sección Proyecto 18 */}
+      <Project18Section />
+      
+      <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-6 md:px-4 max-w-6xl">
         {/* Heading */}
         <motion.h2
@@ -72,7 +77,7 @@ export default function ContactSection() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeInUpVariants}
         >
-          Financiado por los hinchas. <br></br> Relatado por Víctor Hugo.
+          Financiado por los oyentes. <br></br> Relatado por Víctor Hugo.
         </motion.h2>
 
         {/* Main Card */}
@@ -126,7 +131,7 @@ export default function ContactSection() {
                     letterSpacing: '0%'
                   }}
                 >
-                  Una oportunidad para que los hinchas y oyentes devuelvan a Víctor Hugo todo lo que él nos dio: <b>su voz,
+                  Una oportunidad para que los oyentes agradezcan a Víctor Hugo todo lo que nos dio: <b>su voz,
                   su épica y sus palabras que se convirtieron en parte de nuestra historia.</b>
                 </p>
               </motion.div>
@@ -171,6 +176,7 @@ export default function ContactSection() {
         </motion.div>
       </div>
     </section>
+    </>
   )
 }
 

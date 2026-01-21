@@ -119,7 +119,7 @@ export function HeroSection() {
                 >
                   Llevemos a <strong>Victor Hugo</strong> al Mundial 2026. Financiado por los oyentes.{" "}
                   <br className="block sm:hidden" />
-                  <strong>Producido por el pueblo.</strong>
+                  <strong>Producido por los oyentes.</strong>
                 </motion.p>
 
                 {/* CTA Buttons */}

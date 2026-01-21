@@ -11,7 +11,7 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: "El Último Mundial - Victor Hugo",
-  description: "Llevemos a Victor Hugo al Mundial 2026. Financiado por los oyentes. Producido por el pueblo.",
+  description: "Llevemos a Victor Hugo al Mundial 2026. Financiado por los oyentes. Producido por los oyentes.",
   generator: "v0.app",
   icons: {
     icon: [

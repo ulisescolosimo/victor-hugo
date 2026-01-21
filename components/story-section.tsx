@@ -110,7 +110,7 @@ export function StorySection() {
                 variants={paragraphVariants}
               >
                 Durante el Mundial 2026 (México, Estados Unidos y Canadá),{" "}
-                <span className="font-bold text-white">Victor Hugo</span> —la voz más icónica del fútbol argentino—
+                <span className="font-bold text-white">Victor Hugo</span> —la voz más icónica del fútbol en habla hispana—
                 podría relatar por última vez los partidos de la Selección.
               </motion.p>
               <motion.p
