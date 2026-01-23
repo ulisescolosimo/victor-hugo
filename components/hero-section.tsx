@@ -87,8 +87,8 @@ export function HeroSection() {
       {/* Content Container */}
       <div className="relative z-50 flex flex-col min-h-[85vh] sm:min-h-screen pt-16 sm:pt-20 md:pt-24 lg:pt-0 lg:h-[90vh] lg:min-h-[90vh]">
         {/* Hero Content */}
-        <div className="relative flex flex-1 justify-center items-center sm:items-end pb-0 h-full">
-          <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-6xl w-full pb-8 sm:pb-12 md:pb-16 lg:pb-16 self-center sm:self-end">
+        <div className="relative flex flex-1 justify-center items-end pb-0 h-full">
+          <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-6xl w-full pb-6 sm:pb-12 md:pb-16 lg:pb-16 self-end">
             {/* Left Content */}
             <div className="relative w-full">
                 <motion.h1
@@ -116,6 +116,9 @@ export function HeroSection() {
                   animate="visible"
                   variants={fadeInUpVariants}
                   transition={{ delay: 0.2 }}
+                  style={{
+                    textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.7)'
+                  }}
                 >
                   Llevemos a <strong>Victor Hugo</strong> al Mundial 2026. Financiado por los oyentes.{" "}
                   <br className="block sm:hidden" />
@@ -126,7 +129,7 @@ export function HeroSection() {
                 <div className="mb-8 sm:mb-9 md:mb-10 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
                   <Button
                     size="lg"
-                    className="w-auto min-w-[200px] sm:w-auto px-6 sm:px-8 text-white uppercase hover:opacity-90 text-base sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium"
+                    className="w-full sm:w-auto sm:min-w-[200px] px-4 py-2 sm:px-6 md:px-8 text-white uppercase hover:opacity-90 text-sm sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium"
                     style={{
                       background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                       fontFamily: 'Montserrat, sans-serif',
@@ -138,7 +141,7 @@ export function HeroSection() {
                     size="lg"
                     variant="outline"
                     asChild
-                    className="w-auto min-w-[200px] sm:w-auto border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-6 sm:px-8 uppercase text-base sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
+                    className="w-full sm:w-auto sm:min-w-[200px] border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-4 py-2 sm:px-6 md:px-8 uppercase text-sm sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
                     style={{
                       fontFamily: 'Montserrat, sans-serif',
                     }}
@@ -165,7 +168,7 @@ export function HeroSection() {
                 </div>
 
                 {/* Verification Checkmarks */}
-                <div className="relative z-40 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-x-4 md:gap-x-6 gap-y-3">
+                <div className="relative z-40 hidden sm:flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-x-4 md:gap-x-6 gap-y-3">
                   <div className="flex items-center gap-2">
                     <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shrink-0">
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
@@ -220,11 +223,21 @@ export function HeroSection() {
         variants={imageVariants}
       >
         <div className="relative w-full h-[95vh] sm:h-[85vh] md:h-[70vh] lg:h-[100vh] min-h-[95vh] sm:min-h-[85vh] md:min-h-[70vh] lg:min-h-[100vh]">
+          {/* Imagen para mobile */}
+          <Image
+            src="/images/vhm_mobile-removebg-preview.png"
+            alt="Victor Hugo con micrófono"
+            fill
+            className="object-contain sm:hidden"
+            style={{ objectPosition: "50% 100%" }}
+            priority
+          />
+          {/* Imagen para tablet y desktop */}
           <Image
             src="/images/victor-hugo-microphone.png"
             alt="Victor Hugo con micrófono"
             fill
-            className="object-contain"
+            className="hidden sm:block object-contain"
             style={{ objectPosition: "bottom right" }}
             priority
           />

@@ -41,7 +41,7 @@ export default function Project18Section() {
 
   return (
     <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8 scroll-mt-20 overflow-hidden">
-      <div className="container mx-auto max-w-7xl">
+      <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
           {/* Columna Izquierda - Contenido Principal */}
           <motion.div

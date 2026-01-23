@@ -78,10 +78,10 @@ export function StorySection() {
     >
       <div className="container mx-auto max-w-6xl">
         <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950">
-          <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 items-stretch">
             {/* Image Side */}
             <motion.div
-              className="relative h-[200px] sm:h-[280px] md:h-[350px] lg:h-[400px] min-h-[200px] md:min-h-[350px] order-2 md:order-1"
+              className="relative h-full min-h-[200px] sm:min-h-[280px] md:min-h-[350px] order-2 md:order-1"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.3 }}
