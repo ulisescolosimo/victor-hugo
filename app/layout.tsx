@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const montserrat = Montserrat({ 
@@ -41,6 +42,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${montserrat.variable} font-sans antialiased`}>
         {children}
+        <Toaster richColors position="bottom-right" />
         <Analytics />
       </body>
     </html>

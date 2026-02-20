@@ -1,11 +1,60 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { motion } from "framer-motion"
 import Project18Section from "@/components/project-18-section"
+import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 export default function ContactSection() {
+  const router = useRouter()
+  const [nombre, setNombre] = useState("")
+  const [apellido, setApellido] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!nombre.trim() || !apellido.trim() || !email.trim() || !password || !confirmPassword) {
+      toast.error("Completa todos los campos")
+      return
+    }
+    if (password !== confirmPassword) {
+      toast.error("Las contraseñas no coinciden")
+      return
+    }
+    if (password.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres")
+      return
+    }
+    setLoading(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/miembros` : "",
+        data: {
+          nombre: nombre.trim(),
+          apellido: apellido.trim(),
+        },
+      },
+    })
+    setLoading(false)
+    if (error) {
+      toast.error(error.message)
+      return
+    }
+    toast.success("Revisa tu correo para confirmar la cuenta")
+    router.push("/miembros")
+  }
+
   // Variantes de animación
   const fadeInUpVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -100,7 +149,7 @@ export default function ContactSection() {
               backdropFilter: 'blur(40px)'
             }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-start">
               {/* Left Section - Text */}
               <motion.div
                 className="space-y-3 sm:space-y-4"
@@ -136,8 +185,9 @@ export default function ContactSection() {
                 </p>
               </motion.div>
 
-              {/* Right Section - Form */}
-              <motion.div
+              {/* Right Section - Formulario de registro */}
+              <motion.form
+                onSubmit={handleSubmit}
                 className="space-y-3 sm:space-y-4"
                 initial="hidden"
                 whileInView="visible"
@@ -145,32 +195,85 @@ export default function ContactSection() {
                 variants={staggerContainerVariants}
               >
                 <motion.div variants={staggerItemVariants}>
+                  <Label htmlFor="contact-nombre" className="text-white/90 font-medium text-sm">
+                    Nombre
+                  </Label>
                   <Input
+                    id="contact-nombre"
                     type="text"
-                    placeholder="Nombre y apellido"
-                    className="bg-white text-black placeholder:text-gray-500 rounded-lg h-11 sm:h-11 md:h-12 px-4 text-base md:text-base"
+                    placeholder="Tu nombre"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    autoComplete="given-name"
+                    className="mt-1.5 bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-lg h-11 px-4 focus-visible:ring-pink-500"
                   />
                 </motion.div>
                 <motion.div variants={staggerItemVariants}>
+                  <Label htmlFor="contact-apellido" className="text-white/90 font-medium text-sm">
+                    Apellido
+                  </Label>
                   <Input
-                    type="tel"
-                    placeholder="Teléfono"
-                    className="bg-white text-black placeholder:text-gray-500 rounded-lg h-11 sm:h-11 md:h-12 px-4 text-base md:text-base"
+                    id="contact-apellido"
+                    type="text"
+                    placeholder="Tu apellido"
+                    value={apellido}
+                    onChange={(e) => setApellido(e.target.value)}
+                    autoComplete="family-name"
+                    className="mt-1.5 bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-lg h-11 px-4 focus-visible:ring-pink-500"
                   />
                 </motion.div>
                 <motion.div variants={staggerItemVariants}>
+                  <Label htmlFor="contact-email" className="text-white/90 font-medium text-sm">
+                    Correo electrónico
+                  </Label>
                   <Input
+                    id="contact-email"
                     type="email"
-                    placeholder="Correo electrónico"
-                    className="bg-white text-black placeholder:text-gray-500 rounded-lg h-11 sm:h-11 md:h-12 px-4 text-base md:text-base"
+                    placeholder="tu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    className="mt-1.5 bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-lg h-11 px-4 focus-visible:ring-pink-500"
                   />
                 </motion.div>
                 <motion.div variants={staggerItemVariants}>
-                  <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold text-base sm:text-base md:text-lg h-11 sm:h-11 md:h-12 rounded-lg">
-                    Quiero aportar
+                  <Label htmlFor="contact-password" className="text-white/90 font-medium text-sm">
+                    Contraseña
+                  </Label>
+                  <Input
+                    id="contact-password"
+                    type="password"
+                    placeholder="Mínimo 6 caracteres"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="mt-1.5 bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-lg h-11 px-4 focus-visible:ring-pink-500"
+                  />
+                </motion.div>
+                <motion.div variants={staggerItemVariants}>
+                  <Label htmlFor="contact-confirm" className="text-white/90 font-medium text-sm">
+                    Repetir contraseña
+                  </Label>
+                  <Input
+                    id="contact-confirm"
+                    type="password"
+                    placeholder="Repite tu contraseña"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="mt-1.5 bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-lg h-11 px-4 focus-visible:ring-pink-500"
+                  />
+                </motion.div>
+                <motion.div variants={staggerItemVariants}>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold text-base sm:text-base md:text-lg h-11 sm:h-11 md:h-12 rounded-lg"
+                  >
+                    {loading ? "Creando cuenta…" : "Quiero aportar"}
                   </Button>
                 </motion.div>
-              </motion.div>
+              </motion.form>
             </div>
           </div>
         </motion.div>

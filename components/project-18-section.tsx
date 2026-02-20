@@ -40,7 +40,7 @@ export default function Project18Section() {
   }
 
   return (
-    <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8 scroll-mt-20 overflow-hidden">
+    <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8 scroll-mt-20 overflow-hidden hidden">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
           {/* Columna Izquierda - Contenido Principal */}
@@ -112,7 +112,7 @@ export default function Project18Section() {
               <Button 
                 className="font-semibold text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-10 sm:h-11 md:h-12 bg-gradient-to-r from-[#CA0091] to-[#500062]"
               >
-                QUIERO APORTAR 18 USD
+                QUIERO APORTAR 0.1 USD
               </Button>
             </motion.div>
           </motion.div>

@@ -137,7 +137,7 @@ export function StorySection() {
                     fontFamily: 'Montserrat, sans-serif',
                   }}
                 >
-                  Quiero aportar 18 USD
+                  Quiero aportar 0.1 USD
                 </Button>
                 <Button
                   size="sm"

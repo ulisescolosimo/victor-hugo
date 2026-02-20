@@ -25,7 +25,7 @@ export default function NotFound() {
 
             {/* Mensaje principal */}
             <div className="space-y-4 max-w-2xl">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center text-white tracking-tight">
                 Página no encontrada
               </h2>
               <p className="text-white/70 text-base sm:text-lg md:text-xl leading-relaxed">

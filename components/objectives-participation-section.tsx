@@ -1,16 +1,45 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
+import { createClient } from "@/lib/supabase/client"
+
+type FundingPhase = {
+  id: string
+  sort_order: number
+  title: string
+  amount: string
+  description: string | null
+}
+
+const DEFAULT_PHASES: FundingPhase[] = [
+  { id: "1", sort_order: 1, title: "FASE 01", amount: "200.000 USD", description: "Financiación de derechos de transmisión." },
+  { id: "2", sort_order: 2, title: "FASE 02", amount: "200.000 USD", description: "Logística, viaje y cobertura." },
+  { id: "3", sort_order: 3, title: "FASE 03", amount: "200.000 USD", description: "Transmisión, Documental y legado" },
+]
 
 export default function ObjectivesParticipationSection() {
   const [quantity, setQuantity] = useState(3)
-  const contributionAmount = 18
+  const [phases, setPhases] = useState<FundingPhase[]>(DEFAULT_PHASES)
+  const contributionAmount = 0.1
   const totalAmount = quantity * contributionAmount
+
+  useEffect(() => {
+    const client = createClient()
+    client
+      .from("funding_phases")
+      .select("id, sort_order, title, amount, description")
+      .order("sort_order", { ascending: true })
+      .then(({ data, error }) => {
+        if (!error && data?.length) {
+          setPhases(data as FundingPhase[])
+        }
+      })
+  }, [])
 
   // Variantes de animación
   const fadeInUpVariants = {
@@ -56,6 +85,15 @@ export default function ObjectivesParticipationSection() {
     },
   }
 
+  // Sin animación de opacidad para que el texto de fases no se vea transparente
+  const phaseItemVariants = {
+    hidden: { y: 20 },
+    visible: {
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  }
+
   const slideInLeftVariants = {
     hidden: { opacity: 0, x: -50 },
     visible: {
@@ -84,27 +122,6 @@ export default function ObjectivesParticipationSection() {
     { text: "Producir un documental de bajo presupuesto: ", bold: "El último Mundial." },
     "Homenajear la carrera de Víctor Hugo que marcó a generaciones.",
     "Involucrar a la comunidad en cada paso.",
-  ]
-
-  const phases = [
-    {
-      number: 1,
-      title: "FASE 01",
-      amount: "200.000 USD",
-      description: "Financiación de derechos de transmisión.",
-    },
-    {
-      number: 2,
-      title: "FASE 02",
-      amount: "200.000 USD",
-      description: "Logística, viaje y cobertura.",
-    },
-    {
-      number: 3,
-      title: "FASE 03",
-      amount: "200.000 USD",
-      description: "Transmisión, Documental y legado",
-    },
   ]
 
   const handleQuantityChange = (value: number) => {
@@ -180,7 +197,7 @@ export default function ObjectivesParticipationSection() {
                   fontFamily: 'Montserrat, sans-serif',
                 }}
               >
-                18 USD
+                0.1 USD
               </p>
               <div className="mt-auto flex items-end">
                 <Button 
@@ -189,7 +206,7 @@ export default function ObjectivesParticipationSection() {
                     background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                   }}
                 >
-                  QUIERO APORTAR 18 USD
+                  QUIERO APORTAR 0.1 USD
                 </Button>
               </div>
               </div>
@@ -320,19 +337,19 @@ export default function ObjectivesParticipationSection() {
             </motion.div>
 
             {/* Columna derecha: Fases */}
-            <motion.div variants={slideInRightVariants}>
+            <motion.div variants={slideInRightVariants} className="opacity-100">
               <motion.div
-                className="space-y-5 sm:space-y-6"
+                className="space-y-5 sm:space-y-6 opacity-100"
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: true, amount: 0.1 }}
                 variants={staggerContainerVariants}
               >
                 {phases.map((phase) => (
                   <motion.div
-                    key={phase.number}
-                    className="flex items-start gap-4 sm:gap-6 md:gap-8"
-                    variants={staggerItemVariants}
+                    key={phase.id}
+                    className="flex items-start gap-4 sm:gap-6 md:gap-8 opacity-100"
+                    variants={phaseItemVariants}
                   >
                     <div 
                       className="flex-shrink-0 flex items-center justify-center relative w-16 h-16 sm:w-20 sm:h-20 md:w-20 md:h-20"
@@ -343,38 +360,42 @@ export default function ObjectivesParticipationSection() {
                         className="absolute inset-0 w-full h-full object-contain"
                       />
                       <span 
-                        className="relative text-white text-[48px] sm:text-[56px] md:text-[64px] leading-[128%] tracking-normal text-center font-bold"
+                        className="relative text-[48px] sm:text-[56px] md:text-[64px] leading-[128%] tracking-normal text-center font-bold text-white opacity-100"
                         style={{
                           fontFamily: 'Montserrat, sans-serif',
+                          color: '#ffffff',
                         }}
                       >
-                        {phase.number}
+                        {phase.sort_order}
                       </span>
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 opacity-100">
                       <h4 
-                        className="text-white mb-1 text-[24px] sm:text-[26px] md:text-[29px] leading-[128%] tracking-normal font-bold"
+                        className="mb-1 text-[24px] sm:text-[26px] md:text-[29px] leading-[128%] tracking-normal font-bold text-white opacity-100"
                         style={{
                           fontFamily: 'Montserrat, sans-serif',
+                          color: '#ffffff',
                         }}
                       >
                         {phase.title}
                       </h4>
                       <p 
-                        className="text-white mb-1 text-lg sm:text-xl leading-[128%] tracking-normal font-normal"
+                        className="mb-1 text-lg sm:text-xl leading-[128%] tracking-normal font-normal text-white opacity-100"
                         style={{
                           fontFamily: 'Montserrat, sans-serif',
+                          color: '#ffffff',
                         }}
                       >
                         {phase.amount}
                       </p>
                       <p 
-                        className="text-white/70 text-base sm:text-lg md:text-xl leading-[128%] tracking-normal font-normal"
+                        className="text-base sm:text-lg md:text-xl leading-[128%] tracking-normal font-normal opacity-90 text-white"
                         style={{
                           fontFamily: 'Montserrat, sans-serif',
+                          color: 'rgba(255, 255, 255, 0.9)',
                         }}
                       >
-                        {phase.description}
+                        {phase.description ?? ""}
                       </p>
                     </div>
                   </motion.div>
