@@ -48,12 +48,15 @@ type PaymentStatus =
   | "in_process"
   | "refunded"
 
+type PaymentProvider = "mercadopago" | "paypal"
+
 type Payment = {
   id: string
   status: PaymentStatus
   amount_usd: number
   quantity: number
   created_at: string
+  payment_provider?: PaymentProvider | null
 }
 
 const STATUS_LABELS: Record<PaymentStatus, string> = {
@@ -415,6 +418,15 @@ function HistorialList({
       </div>
     )
   }
+  const providerLabel = (provider?: PaymentProvider | null) => {
+    if (provider === "paypal") return "PayPal"
+    return "Mercado Pago"
+  }
+  const providerBadgeClass = (provider?: PaymentProvider | null) =>
+    provider === "paypal"
+      ? "border-[#0070ba]/50 bg-[#0070ba]/10 text-[#0070ba]"
+      : "border-[#009ee3]/50 bg-[#009ee3]/10 text-[#009ee3]"
+
   return (
     <ul className="space-y-2" role="list">
       {payments.map((p) => (
@@ -426,7 +438,15 @@ function HistorialList({
             <span className="text-zinc-300 font-medium">
               {formatDate(p.created_at)}
             </span>
-            <span className="text-zinc-500 text-xs">
+            <span className="text-zinc-500 text-xs flex items-center gap-1.5 flex-wrap">
+              <span
+                className={
+                  "inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium border " +
+                  providerBadgeClass(p.payment_provider)
+                }
+              >
+                {providerLabel(p.payment_provider)}
+              </span>
               {p.quantity}{" "}
               {p.quantity === 1 ? "aporte" : "aportes"} ·{" "}
               {(p.quantity * DISPLAY_CONTRIBUTION_USD).toFixed(2)} USD
@@ -471,7 +491,7 @@ function MiembrosContent() {
       setAuthLoading(false)
       client
         .from("payments")
-        .select("id, status, amount_usd, quantity, created_at")
+        .select("id, status, amount_usd, quantity, created_at, payment_provider")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .then(
@@ -484,10 +504,57 @@ function MiembrosContent() {
     })
   }, [router, searchParams])
 
-  // Query params payment / payment_id
+  // PayPal: token = order ID; al volver con success + token hay que capturar
+  const [capturingPayPal, setCapturingPayPal] = useState(false)
   useEffect(() => {
+    const token = searchParams.get("token")
     const payment = searchParams.get("payment")
     const paymentId = searchParams.get("payment_id")
+
+    if (token && (payment === "success" || !payment)) {
+      setCapturingPayPal(true)
+      fetch("/api/paypal/capture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: token,
+          ...(paymentId && { paymentId }),
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.ok) {
+            setRedirectMessage({
+              type: "success",
+              text: "Pago acreditado. Gracias por tu aporte.",
+            })
+            setPayments((prev) =>
+              prev.map((p) =>
+                p.id === (data.paymentId ?? paymentId)
+                  ? { ...p, status: "approved" as const }
+                  : p
+              )
+            )
+          } else {
+            setRedirectMessage({
+              type: "failure",
+              text: data.error ?? "Error al completar el pago con PayPal.",
+            })
+          }
+        })
+        .catch(() => {
+          setRedirectMessage({
+            type: "failure",
+            text: "Error al procesar el pago. Revisá tu historial.",
+          })
+        })
+        .finally(() => {
+          setCapturingPayPal(false)
+          window.history.replaceState({}, "", "/miembros")
+        })
+      return
+    }
+
     if (!payment || !paymentId) return
     const messages: Record<
       string,
@@ -505,6 +572,10 @@ function MiembrosContent() {
         type: "pending",
         text: "Tu pago está pendiente. Te avisaremos cuando se acredite.",
       },
+      cancelled: {
+        type: "failure",
+        text: "Pago cancelado. Podés intentar de nuevo cuando quieras.",
+      },
     }
     const msg = messages[payment]
     if (msg) {
@@ -518,7 +589,9 @@ function MiembrosContent() {
                   ? "approved"
                   : payment === "pending"
                     ? "pending"
-                    : p.status) as Payment["status"],
+                    : payment === "cancelled"
+                      ? "cancelled"
+                      : p.status) as Payment["status"],
               }
             : p
         )
@@ -533,7 +606,41 @@ function MiembrosContent() {
       const res = await fetch("/api/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity }),
+        body: JSON.stringify({ quantity, provider: "mercadopago" }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setRedirectMessage({
+          type: "failure",
+          text: data.error ?? "Error al crear el pago",
+        })
+        return
+      }
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl
+        return
+      }
+      setRedirectMessage({
+        type: "failure",
+        text: "No se obtuvo la URL de pago.",
+      })
+    } catch {
+      setRedirectMessage({
+        type: "failure",
+        text: "Error de conexión. Intentá de nuevo.",
+      })
+    } finally {
+      setPaymentLoading(false)
+    }
+  }, [quantity])
+
+  const handlePayWithPayPal = useCallback(async () => {
+    setPaymentLoading(true)
+    try {
+      const res = await fetch("/api/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity, provider: "paypal" }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -623,7 +730,19 @@ function MiembrosContent() {
               isLoading={paymentsLoading}
             />
 
-            {redirectMessage && (
+            {capturingPayPal && (
+              <motion.div variants={fadeIn}>
+                <Alert
+                  className="border-amber-500/40 bg-amber-500/10 text-amber-200"
+                  role="status"
+                >
+                  <Loader2 className="mr-2 size-4 animate-spin inline" aria-hidden />
+                  <AlertDescription>Procesando pago con PayPal…</AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+
+            {redirectMessage && !capturingPayPal && (
               <motion.div variants={fadeIn}>
                 <RedirectAlert
                   type={redirectMessage.type}
@@ -705,27 +824,39 @@ function MiembrosContent() {
                     </p>
                   </div>
 
-                  <Button
-                    onClick={handlePayWithMercadoPago}
-                    disabled={paymentLoading}
-                    className="w-full sm:w-auto bg-[#009ee3] hover:bg-[#008cd1] text-white font-semibold h-11 px-6"
-                    size="lg"
-                  >
-                    {paymentLoading ? (
-                      <>
-                        <Loader2
-                          className="mr-2 size-4 animate-spin"
-                          aria-hidden
-                        />
-                        Redirigiendo…
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="mr-2 size-4" aria-hidden />
-                        Pagar con Mercado Pago
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      onClick={handlePayWithMercadoPago}
+                      disabled={paymentLoading}
+                      className="w-full sm:w-auto bg-[#009ee3] hover:bg-[#008cd1] text-white font-semibold h-11 px-6"
+                      size="lg"
+                    >
+                      {paymentLoading ? (
+                        <>
+                          <Loader2
+                            className="mr-2 size-4 animate-spin"
+                            aria-hidden
+                          />
+                          Redirigiendo…
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="mr-2 size-4" aria-hidden />
+                          Pagar con Mercado Pago
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handlePayWithPayPal}
+                      disabled={paymentLoading}
+                      variant="outline"
+                      className="w-full sm:w-auto border-[#0070ba] bg-[#0070ba]/10 hover:bg-[#0070ba]/20 text-[#0070ba] font-semibold h-11 px-6"
+                      size="lg"
+                    >
+                      <CreditCard className="mr-2 size-4" aria-hidden />
+                      Pagar con PayPal
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

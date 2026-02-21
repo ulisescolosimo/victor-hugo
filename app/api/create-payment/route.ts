@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getUsdToArsRate } from "@/lib/get-usd-ars-rate"
 import { MercadoPagoConfig, Preference } from "mercadopago"
+import { createOrder } from "@/lib/paypal"
 
 const UNIT_PRICE_USD = 0.1
 const MIN_QUANTITY = 1
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const quantity = Math.min(MAX_QUANTITY, Math.max(MIN_QUANTITY, Number(body?.quantity) || 1))
+    const provider = body?.provider === "paypal" ? "paypal" : "mercadopago"
 
     const amountUsd = quantity * UNIT_PRICE_USD
     const { rate: usdToArsRate } = await getUsdToArsRate()
@@ -42,13 +44,14 @@ export async function POST(request: NextRequest) {
         user_name: userName,
         amount_usd: amountUsd,
         amount_ars: amountArs,
-        currency_id: "ARS",
+        currency_id: provider === "paypal" ? "USD" : "ARS",
         usd_to_ars_rate: usdToArsRate,
         quantity,
         unit_price_usd: UNIT_PRICE_USD,
         title,
         status: "pending",
         external_reference: crypto.randomUUID(),
+        payment_provider: provider,
       })
       .select("id, external_reference")
       .single()
@@ -58,13 +61,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Error al crear el pago" }, { status: 500 })
     }
 
+    const siteUrl = getSiteUrl(request)
+
+    if (provider === "paypal") {
+      try {
+        const description =
+          quantity === 1
+            ? `1 Aporte - Proyecto VHM`
+            : `${quantity} Aportes - Proyecto VHM`
+        const { orderId, approveUrl } = await createOrder({
+          paymentId: payment.id,
+          amountUsd,
+          description: `${description} - ${quantity} x ${UNIT_PRICE_USD} USD`,
+          returnUrl: `${siteUrl}/miembros?payment=success&payment_id=${payment.id}`,
+          cancelUrl: `${siteUrl}/miembros?payment=cancelled&payment_id=${payment.id}`,
+          brandName: "Proyecto VHM",
+          requestId: payment.id,
+        })
+        await supabase
+          .from("payments")
+          .update({
+            preference_id: orderId,
+            payment_url: approveUrl,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", payment.id)
+        return NextResponse.json({
+          paymentUrl: approveUrl,
+          paymentId: payment.id,
+          preferenceId: orderId,
+        })
+      } catch (err) {
+        console.error("PayPal create order error:", err)
+        return NextResponse.json(
+          { error: "Error al crear la orden en PayPal" },
+          { status: 500 }
+        )
+      }
+    }
+
     const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN
     const notificationUrl = process.env.N8N_ENDPOINT_VHM
     if (!accessToken) {
       return NextResponse.json({ error: "MercadoPago no configurado" }, { status: 500 })
     }
 
-    const siteUrl = getSiteUrl(request)
     const backUrls = {
       success: `${siteUrl}/miembros?payment=success&payment_id=${payment.id}`,
       failure: `${siteUrl}/miembros?payment=failure&payment_id=${payment.id}`,
