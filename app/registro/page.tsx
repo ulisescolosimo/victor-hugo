@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Header } from "@/components/header"
@@ -44,7 +44,7 @@ function getRedirectPath(redirect: string | null): string {
   return "/"
 }
 
-export default function RegistroPage() {
+function RegistroContent() {
   const searchParams = useSearchParams()
   const redirectTo = getRedirectPath(searchParams.get("redirect"))
   const [nombre, setNombre] = useState("")
@@ -223,5 +223,24 @@ export default function RegistroPage() {
 
       <Footer />
     </main>
+  )
+}
+
+export default function RegistroPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-black">
+          <div className="relative">
+            <Header />
+          </div>
+          <section className="relative bg-[#1a1a1a] min-h-[60vh] flex items-center justify-center">
+            <p className="text-white/70">Cargando…</p>
+          </section>
+        </main>
+      }
+    >
+      <RegistroContent />
+    </Suspense>
   )
 }
