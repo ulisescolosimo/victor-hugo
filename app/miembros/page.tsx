@@ -35,7 +35,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const MUNDIAL_DATE = new Date("2026-06-11T12:00:00Z")
+/** Valor real en backend (pruebas). No cambiar para cobros. */
 const CONTRIBUTION_UNIT_USD = 0.1
+/** Valor mostrado en UI. Siempre 18 USD para el usuario. */
+const DISPLAY_CONTRIBUTION_USD = 18
 
 type PaymentStatus =
   | "pending"
@@ -426,7 +429,7 @@ function HistorialList({
             <span className="text-zinc-500 text-xs">
               {p.quantity}{" "}
               {p.quantity === 1 ? "aporte" : "aportes"} ·{" "}
-              {Number(p.amount_usd).toFixed(2)} USD
+              {(p.quantity * DISPLAY_CONTRIBUTION_USD).toFixed(2)} USD
               {p.id ? <span className="ml-1">· #{p.id.slice(-6)}</span> : null}
             </span>
           </div>
@@ -447,7 +450,8 @@ function MiembrosContent() {
   const [paymentsLoading, setPaymentsLoading] = useState(true)
   const [payments, setPayments] = useState<Payment[]>([])
   const [paymentLoading, setPaymentLoading] = useState(false)
-  const [quantity, setQuantity] = useState(1)
+  const quantityParam = Math.min(10, Math.max(1, Number(searchParams.get("quantity")) || 1))
+  const [quantity, setQuantity] = useState(quantityParam)
   const [historialTab, setHistorialTab] = useState<HistorialFilter>("todos")
   const [redirectMessage, setRedirectMessage] = useState<{
     type: "success" | "failure" | "pending"
@@ -459,7 +463,9 @@ function MiembrosContent() {
     const client = createClient()
     client.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
-        router.replace("/login?redirect=/miembros")
+        const q = searchParams.get("quantity")
+        const redirectPath = q ? `/miembros?quantity=${q}` : "/miembros"
+        router.replace("/login?redirect=" + encodeURIComponent(redirectPath))
         return
       }
       setAuthLoading(false)
@@ -476,7 +482,7 @@ function MiembrosContent() {
           () => setPaymentsLoading(false)
         )
     })
-  }, [router])
+  }, [router, searchParams])
 
   // Query params payment / payment_id
   useEffect(() => {
@@ -564,8 +570,8 @@ function MiembrosContent() {
     [approvedPayments]
   )
   const totalUsd = useMemo(
-    () => approvedPayments.reduce((acc, p) => acc + Number(p.amount_usd), 0),
-    [approvedPayments]
+    () => totalAportes * DISPLAY_CONTRIBUTION_USD,
+    [totalAportes]
   )
   const ultimoAporte = useMemo(() => {
     if (approvedPayments.length === 0) return null
@@ -693,7 +699,7 @@ function MiembrosContent() {
                     <p id="quantity-hint" className="text-xs text-zinc-500">
                       Total:{" "}
                       <span id="total-usd" className="font-medium text-zinc-300">
-                        {(quantity * CONTRIBUTION_UNIT_USD).toFixed(2)} USD
+                        {(quantity * DISPLAY_CONTRIBUTION_USD).toFixed(2)} USD
                       </span>
                       . Se cobrará en ARS al TC del día.
                     </p>

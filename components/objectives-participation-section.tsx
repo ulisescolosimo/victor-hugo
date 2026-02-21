@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,11 +23,37 @@ const DEFAULT_PHASES: FundingPhase[] = [
   { id: "3", sort_order: 3, title: "FASE 03", amount: "200.000 USD", description: "Transmisión, Documental y legado" },
 ]
 
+const MEMBROS_PATH = "/miembros"
+
+function getMembrosUrl(quantity: number) {
+  const q = Math.min(10, Math.max(1, quantity))
+  return `${MEMBROS_PATH}?quantity=${q}`
+}
+
 export default function ObjectivesParticipationSection() {
+  const router = useRouter()
   const [quantity, setQuantity] = useState(3)
   const [phases, setPhases] = useState<FundingPhase[]>(DEFAULT_PHASES)
-  const contributionAmount = 0.1
+  const [authChecking, setAuthChecking] = useState(false)
+  /** Solo para mostrar en UI. Backend usa 0.1 USD en pruebas. */
+  const contributionAmount = 18
   const totalAmount = quantity * contributionAmount
+
+  const goToPay = useCallback(async (q: number) => {
+    setAuthChecking(true)
+    try {
+      const client = createClient()
+      const { data: { user } } = await client.auth.getUser()
+      const targetUrl = getMembrosUrl(q)
+      if (!user) {
+        router.push("/login?redirect=" + encodeURIComponent(targetUrl))
+        return
+      }
+      router.push(targetUrl)
+    } finally {
+      setAuthChecking(false)
+    }
+  }, [router])
 
   useEffect(() => {
     const client = createClient()
@@ -197,16 +224,19 @@ export default function ObjectivesParticipationSection() {
                   fontFamily: 'Montserrat, sans-serif',
                 }}
               >
-                0.1 USD
+                18 USD
               </p>
               <div className="mt-auto flex items-end">
                 <Button 
+                  type="button"
+                  disabled={authChecking}
+                  onClick={() => goToPay(1)}
                   className="w-full font-semibold text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-10 sm:h-11 md:h-12"
                   style={{
                     background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                   }}
                 >
-                  QUIERO APORTAR 0.1 USD
+                  {authChecking ? "…" : "QUIERO APORTAR 18 USD"}
                 </Button>
               </div>
               </div>
@@ -275,9 +305,12 @@ export default function ObjectivesParticipationSection() {
                   </button>
                 </div>
                 <Button 
+                  type="button"
+                  disabled={authChecking}
+                  onClick={() => goToPay(quantity)}
                   className="font-semibold hover:bg-gray-100 bg-white text-black text-sm md:text-base px-4 md:px-6 py-3 md:py-3 h-12 md:h-12 transition-all duration-200 active:scale-95 touch-manipulation w-full md:w-auto"
                 >
-                  QUIERO APORTAR {totalAmount} USD
+                  {authChecking ? "…" : `QUIERO APORTAR ${totalAmount} USD`}
                 </Button>
               </div>
               </div>

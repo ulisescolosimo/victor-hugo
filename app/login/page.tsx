@@ -148,7 +148,10 @@ function LoginContent() {
               </form>
               <p className="mt-6 text-center text-white/70 text-sm">
                 ¿No tenés cuenta?{" "}
-                <Link href="/registro" className="text-pink-400 hover:text-pink-300 font-medium underline-offset-2 hover:underline">
+                <Link
+                  href={redirectTo !== "/" ? "/registro?redirect=" + encodeURIComponent(redirectTo) : "/registro"}
+                  className="text-pink-400 hover:text-pink-300 font-medium underline-offset-2 hover:underline"
+                >
                   Registrate
                 </Link>
               </p>

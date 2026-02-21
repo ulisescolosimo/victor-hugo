@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
@@ -37,7 +38,15 @@ const staggerItemVariants = {
   },
 }
 
+function getRedirectPath(redirect: string | null): string {
+  if (!redirect) return "/"
+  if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect
+  return "/"
+}
+
 export default function RegistroPage() {
+  const searchParams = useSearchParams()
+  const redirectTo = getRedirectPath(searchParams.get("redirect"))
   const [nombre, setNombre] = useState("")
   const [apellido, setApellido] = useState("")
   const [email, setEmail] = useState("")
@@ -61,11 +70,12 @@ export default function RegistroPage() {
     }
     setLoading(true)
     const supabase = createClient()
+    const origin = typeof window !== "undefined" ? window.location.origin : ""
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/`,
+        emailRedirectTo: redirectTo !== "/" ? `${origin}${redirectTo}` : `${origin}/`,
         data: {
           nombre: nombre.trim(),
           apellido: apellido.trim(),
@@ -78,7 +88,7 @@ export default function RegistroPage() {
       return
     }
     toast.success("Revisa tu correo para confirmar la cuenta")
-    window.location.href = "/"
+    window.location.href = redirectTo
   }
 
   return (
@@ -199,7 +209,10 @@ export default function RegistroPage() {
               </form>
               <p className="mt-6 text-center text-white/70 text-sm">
                 ¿Ya tienes cuenta?{" "}
-                <Link href="/login" className="text-pink-400 hover:text-pink-300 font-medium underline-offset-2 hover:underline">
+                <Link
+                  href={redirectTo !== "/" ? "/login?redirect=" + encodeURIComponent(redirectTo) : "/login"}
+                  className="text-pink-400 hover:text-pink-300 font-medium underline-offset-2 hover:underline"
+                >
                   Inicia sesión
                 </Link>
               </p>

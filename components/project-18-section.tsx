@@ -112,7 +112,7 @@ export default function Project18Section() {
               <Button 
                 className="font-semibold text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-10 sm:h-11 md:h-12 bg-gradient-to-r from-[#CA0091] to-[#500062]"
               >
-                QUIERO APORTAR 0.1 USD
+                QUIERO APORTAR 18 USD
               </Button>
             </motion.div>
           </motion.div>
