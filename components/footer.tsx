@@ -25,6 +25,9 @@ export default function Footer() {
           <div className="flex flex-col items-start sm:items-end justify-end md:items-end gap-5 sm:gap-6 w-full sm:w-auto">
             {/* Links */}
             <div className="flex flex-wrap gap-4 sm:gap-6">
+              <a href="mailto:info@elultimomundial.com" className="text-white/80 hover:text-white text-sm transition-colors">
+                Soporte: info@elultimomundial.com
+              </a>
               <a href="#" className="text-white/80 hover:text-white text-sm transition-colors">
                 Términos y condiciones
               </a>

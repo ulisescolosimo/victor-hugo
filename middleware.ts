@@ -2,6 +2,16 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // No ejecutar lógica de auth en restablecer: preservar query params (code, type, etc.)
+  // para que la página pueda hacer exchangeCodeForSession sin que el middleware toque la request.
+  if (pathname === "/restablecer") {
+    return NextResponse.next({
+      request: { headers: request.headers },
+    })
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,

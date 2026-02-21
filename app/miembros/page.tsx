@@ -600,7 +600,7 @@ function MiembrosContent() {
       </div>
 
       <section className="relative bg-zinc-900/50 py-12 sm:py-16 md:py-20 min-h-[80vh]">
-        <div className="container mx-auto px-4 sm:px-6 max-w-5xl pt-8">
+        <div className="container mx-auto px-4 sm:px-8 max-w-6xl pt-8">
           <motion.h1
             className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-8"
             initial="hidden"

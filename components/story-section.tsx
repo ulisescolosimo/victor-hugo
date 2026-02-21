@@ -1,14 +1,41 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useCallback, useState, useRef } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
+
+const MEMBROS_PATH = "/miembros"
+
+function getMembrosUrl(quantity: number) {
+  const q = Math.min(10, Math.max(1, quantity))
+  return `${MEMBROS_PATH}?quantity=${q}`
+}
 
 export function StorySection() {
+  const router = useRouter()
   const [isPlaying, setIsPlaying] = useState(false)
+  const [authChecking, setAuthChecking] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  const goToAportar = useCallback(async () => {
+    setAuthChecking(true)
+    try {
+      const client = createClient()
+      const { data: { user } } = await client.auth.getUser()
+      const targetUrl = getMembrosUrl(1)
+      if (!user) {
+        router.push("/login?redirect=" + encodeURIComponent(targetUrl))
+        return
+      }
+      router.push(targetUrl)
+    } finally {
+      setAuthChecking(false)
+    }
+  }, [router])
 
   const handlePlay = () => {
     if (videoRef.current) {
@@ -131,13 +158,16 @@ export function StorySection() {
               >
                 <Button
                   size="sm"
-                  className="w-full sm:w-auto min-w-[160px] px-4 sm:px-5 text-white uppercase hover:opacity-90 text-sm sm:text-base leading-[107%] tracking-normal font-medium"
+                  type="button"
+                  onClick={goToAportar}
+                  disabled={authChecking}
+                  className="w-full sm:w-auto min-w-[160px] px-4 sm:px-5 text-white uppercase hover:opacity-90 text-sm sm:text-base leading-[107%] tracking-normal font-medium disabled:opacity-70 disabled:pointer-events-none"
                   style={{
                     background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                     fontFamily: 'Montserrat, sans-serif',
                   }}
                 >
-                  Quiero aportar 18 USD
+                  {authChecking ? "Un momento…" : "Quiero aportar 18 USD"}
                 </Button>
                 <Button
                   size="sm"

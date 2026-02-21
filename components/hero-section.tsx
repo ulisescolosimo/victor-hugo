@@ -1,11 +1,39 @@
 "use client"
 
+import { useCallback, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { createClient } from "@/lib/supabase/client"
+
+const MEMBROS_PATH = "/miembros"
+
+function getMembrosUrl(quantity: number) {
+  const q = Math.min(10, Math.max(1, quantity))
+  return `${MEMBROS_PATH}?quantity=${q}`
+}
 
 export function HeroSection() {
+  const router = useRouter()
+  const [authChecking, setAuthChecking] = useState(false)
+
+  const goToAportar = useCallback(async () => {
+    setAuthChecking(true)
+    try {
+      const client = createClient()
+      const { data: { user } } = await client.auth.getUser()
+      const targetUrl = getMembrosUrl(1)
+      if (!user) {
+        router.push("/login?redirect=" + encodeURIComponent(targetUrl))
+        return
+      }
+      router.push(targetUrl)
+    } finally {
+      setAuthChecking(false)
+    }
+  }, [router])
   // Variantes de animación para el título
   const titleVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -129,13 +157,16 @@ export function HeroSection() {
                 <div className="mb-8 sm:mb-9 md:mb-10 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto sm:min-w-[200px] px-4 py-2 sm:px-6 md:px-8 text-white uppercase hover:opacity-90 text-sm sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium"
+                    type="button"
+                    onClick={goToAportar}
+                    disabled={authChecking}
+                    className="w-full sm:w-auto sm:min-w-[200px] px-4 py-2 sm:px-6 md:px-8 text-white uppercase hover:opacity-90 text-sm sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium disabled:opacity-70 disabled:pointer-events-none"
                     style={{
                       background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                       fontFamily: 'Montserrat, sans-serif',
                     }}
                   >
-                    Quiero aportar 18 USD
+                    {authChecking ? "Un momento…" : "Quiero aportar 18 USD"}
                   </Button>
                   <Button
                     size="lg"
