@@ -2,7 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
+
+  // Si Supabase redirige a / con ?code=... (en vez de /auth/callback), reenviar al callback para hacer el exchange
+  if (pathname === "/" && searchParams.has("code")) {
+    const callbackUrl = new URL("/auth/callback", request.url)
+    searchParams.forEach((value, key) => callbackUrl.searchParams.set(key, value))
+    if (!callbackUrl.searchParams.has("next")) callbackUrl.searchParams.set("next", "/")
+    return NextResponse.redirect(callbackUrl)
+  }
 
   // No ejecutar lógica de auth en restablecer ni en auth/callback: preservar query params (code, etc.)
   // para que la página/route pueda hacer exchangeCodeForSession sin que el middleware toque la request.

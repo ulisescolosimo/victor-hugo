@@ -27,9 +27,13 @@ import type { User } from "@supabase/supabase-js"
 export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [sheetReady, setSheetReady] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const isMiembrosPage = pathname === "/miembros"
+
+  // Evitar hidratación con Radix: el Sheet solo se monta en cliente (IDs aria-controls difieren SSR vs cliente)
+  useEffect(() => setSheetReady(true), [])
 
   useEffect(() => {
     const client = createClient()
@@ -184,6 +188,15 @@ export function Header() {
 
           {/* Mobile/Tablet Menu Hamburger */}
           <div className="lg:hidden relative z-[70]">
+            {!sheetReady ? (
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] size-10 text-white hover:bg-white/10 active:bg-white/20 border-0 cursor-pointer touch-manipulation"
+                aria-label="Abrir menú"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            ) : (
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <button
@@ -357,6 +370,7 @@ export function Header() {
                 </div>
               </SheetContent>
             </Sheet>
+            )}
           </div>
         </div>
       </nav>
