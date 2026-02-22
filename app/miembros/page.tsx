@@ -33,10 +33,12 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 const MUNDIAL_DATE = new Date("2026-06-11T12:00:00Z")
-/** Valor real en backend (pruebas). No cambiar para cobros. */
-const CONTRIBUTION_UNIT_USD = 0.1
-/** Valor mostrado en UI. Siempre 18 USD para el usuario. */
+/** Precio por aporte en USD (18). Mismo valor para PayPal, Mercado Pago y UI. */
 const DISPLAY_CONTRIBUTION_USD = 18
+/** Porcentaje que se agrega por plataforma de pagos al valor final. */
+const PLATFORM_FEE_PERCENT = 12
+/** Máximo de aportes por pago. */
+const MAX_QUANTITY = 50
 
 type PaymentStatus =
   | "pending"
@@ -446,12 +448,13 @@ function MiembrosContent() {
   const [paymentsLoading, setPaymentsLoading] = useState(true)
   const [payments, setPayments] = useState<Payment[]>([])
   const [paymentLoading, setPaymentLoading] = useState(false)
-  const quantityParam = Math.min(10, Math.max(1, Number(searchParams.get("quantity")) || 1))
+  const quantityParam = Math.min(MAX_QUANTITY, Math.max(1, Number(searchParams.get("quantity")) || 1))
   const [quantity, setQuantity] = useState(quantityParam)
   const [redirectMessage, setRedirectMessage] = useState<{
     type: "success" | "failure" | "pending"
     text: string
   } | null>(null)
+  const [usdToArsRate, setUsdToArsRate] = useState<number | null>(null)
 
   // Una sola verificación de auth y fetch de payments
   useEffect(() => {
@@ -478,6 +481,14 @@ function MiembrosContent() {
         )
     })
   }, [router, searchParams])
+
+  // Cotización USD → ARS para mostrar precio final en ARS
+  useEffect(() => {
+    fetch("/api/usd-ars-rate")
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+      .then((data: { rate: number }) => setUsdToArsRate(data.rate))
+      .catch(() => setUsdToArsRate(null))
+  }, [])
 
   // PayPal: token = order ID; al volver con success + token hay que capturar
   const [capturingPayPal, setCapturingPayPal] = useState(false)
@@ -660,7 +671,7 @@ function MiembrosContent() {
     return approvedPayments[0].created_at
   }, [approvedPayments])
 
-  const clampQuantity = useCallback((n: number) => Math.min(10, Math.max(1, n)), [])
+  const clampQuantity = useCallback((n: number) => Math.min(MAX_QUANTITY, Math.max(1, n)), [])
 
   if (authLoading) {
     return (
@@ -730,14 +741,17 @@ function MiembrosContent() {
             <motion.div variants={fadeIn}>
               <Card className="border-white/10 bg-zinc-900/80 shadow-xl">
                 <CardHeader>
-                  <CardTitle className="text-white">Aportar</CardTitle>
-                  <CardDescription className="text-zinc-400">
-                    Sumá más aportes cuando quieras. Se cobrará en ARS al tipo de
-                    cambio del día.
+                  <CardTitle className="text-white text-2xl sm:text-3xl">
+                    Aportar
+                  </CardTitle>
+                  <CardDescription className="text-zinc-400 text-base sm:text-lg">
+                    Sumá más aportes cuando quieras. Se agrega un{" "}
+                    {PLATFORM_FEE_PERCENT}% por plataforma de pagos al valor
+                    final. Se cobra en ARS al tipo de cambio del día.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Selector cantidad: slider 1–10, valor visible, accesible y táctil */}
+                  {/* Selector cantidad: slider 1–50, valor visible, accesible y táctil */}
                   <div
                     id="quantity-input"
                     className="space-y-4"
@@ -747,14 +761,14 @@ function MiembrosContent() {
                   >
                     <label
                       id="quantity-label"
-                      className="text-sm font-medium text-zinc-300 block"
+                      className="text-base sm:text-lg font-medium text-zinc-300 block"
                     >
-                      Cantidad de aportes (1–10)
+                      Cantidad de aportes (1–{MAX_QUANTITY})
                     </label>
 
                     {/* Valor actual siempre visible (grande, claro) */}
                     <p
-                      className="text-2xl sm:text-3xl font-bold text-white tabular-nums"
+                      className="text-3xl sm:text-4xl font-bold text-white tabular-nums"
                       aria-live="polite"
                       aria-atomic="true"
                     >
@@ -764,37 +778,69 @@ function MiembrosContent() {
                     {/* Slider: track alto, thumb >= 28px, paso 1, snap enteros */}
                     <Slider
                       min={1}
-                      max={10}
+                      max={MAX_QUANTITY}
                       step={1}
                       value={[quantity]}
                       onValueChange={(v) =>
                         setQuantity(clampQuantity(v[0] ?? quantity))
                       }
                       disabled={paymentLoading}
-                      aria-label="Cantidad de aportes, de 1 a 10"
+                      aria-label={`Cantidad de aportes, de 1 a ${MAX_QUANTITY}`}
                       className="w-full py-3 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-track]]:rounded-full [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:bg-white/20 [&_[data-slot=slider-thumb]]:size-7 [&_[data-slot=slider-thumb]]:rounded-full [&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-white/30 [&_[data-slot=slider-thumb]]:bg-zinc-100 [&_[data-slot=slider-thumb]]:shadow-lg [&_[data-slot=slider-thumb]]:transition-transform [&_[data-slot=slider-thumb]]:duration-150 motion-reduce:[&_[data-slot=slider-thumb]]:transition-none focus-visible:[&_[data-slot=slider-thumb]]:ring-4 focus-visible:[&_[data-slot=slider-thumb]]:ring-white/30 focus-visible:[&_[data-slot=slider-thumb]]:outline-none data-[disabled]:opacity-50"
                     />
 
-                    {/* Marcas mínimas: 1 y 10 en los extremos */}
-                    <div className="flex justify-between text-xs text-zinc-500 px-0.5">
+                    {/* Marcas mínimas: 1 y 50 en los extremos */}
+                    <div className="flex justify-between text-sm text-zinc-500 px-0.5">
                       <span aria-hidden>1</span>
-                      <span aria-hidden>10</span>
+                      <span aria-hidden>{MAX_QUANTITY}</span>
                     </div>
 
-                    {/* Total y hint (desktop: puede ir en fila; mobile: stack) */}
-                    <p
+                    {/* Total con 12% plataforma: USD y ARS */}
+                    <div
                       id="quantity-hint"
-                      className="text-xs text-zinc-500 flex flex-wrap items-baseline gap-x-1"
+                      className="text-sm sm:text-base text-zinc-500 space-y-2"
                     >
-                      Total:{" "}
-                      <span
-                        id="total-usd"
-                        className="font-medium text-zinc-300 text-sm"
-                      >
-                        {(quantity * DISPLAY_CONTRIBUTION_USD).toFixed(2)} USD
-                      </span>
-                      . Se cobrará en ARS al TC del día.
-                    </p>
+                      <p className="flex flex-wrap items-baseline gap-x-1">
+                        <span>
+                          {DISPLAY_CONTRIBUTION_USD} USD por aporte +{" "}
+                          {PLATFORM_FEE_PERCENT}% plataforma de pagos.
+                        </span>
+                      </p>
+                      <p className="flex flex-wrap items-baseline gap-x-1.5">
+                        Total final:{" "}
+                        <span
+                          id="total-usd"
+                          className="font-semibold text-zinc-300 text-base sm:text-lg"
+                        >
+                          {(
+                            quantity *
+                            DISPLAY_CONTRIBUTION_USD *
+                            (1 + PLATFORM_FEE_PERCENT / 100)
+                          ).toFixed(2)}{" "}
+                          USD
+                        </span>
+                        {usdToArsRate !== null ? (
+                          <>
+                            <span className="text-zinc-500">(</span>
+                            <span className="font-semibold text-zinc-300 text-base sm:text-lg">
+                              ≈{" "}
+                              {Math.round(
+                                quantity *
+                                  DISPLAY_CONTRIBUTION_USD *
+                                  (1 + PLATFORM_FEE_PERCENT / 100) *
+                                  usdToArsRate
+                              ).toLocaleString("es-AR")}{" "}
+                              ARS
+                            </span>
+                            <span className="text-zinc-500">)</span>
+                          </>
+                        ) : (
+                          <span className="text-zinc-500">
+                            Se cobrará en ARS al TC del día.
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-3">
