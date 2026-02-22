@@ -3,9 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
 import { createClient } from "@/lib/supabase/client"
 
@@ -15,23 +13,47 @@ type FundingPhase = {
   title: string
   amount: string
   description: string | null
+  items?: string[]
+  conclusion?: string
 }
 
 const DEFAULT_PHASES: FundingPhase[] = [
-  { id: "1", sort_order: 1, title: "FASE 01", amount: "200.000 USD", description: "Financiación de derechos de transmisión." },
-  { id: "2", sort_order: 2, title: "FASE 02", amount: "200.000 USD", description: "Logística, viaje y cobertura." },
+  { 
+    id: "1", 
+    sort_order: 1, 
+    title: "ETAPA 1", 
+    amount: "250.000 USD", 
+    description: "Hacer posible la transmisión",
+    items: [
+      "Derechos de transmisión del Mundial 2026.",
+      "Salida al aire por AM750 con Víctor Hugo.",
+      "Si se alcanza esta meta, El Último Mundial sucede."
+    ]
+  },
+  { 
+    id: "2", 
+    sort_order: 2, 
+    title: "ETAPA 2", 
+    amount: "250.000 USD", 
+    description: "Llevar la transmisión más lejos",
+    items: [
+      "Presencia en los estadios durante el Mundial.",
+      "Logística, viajes y cobertura del equipo.",
+      "Si se alcanza esta meta, la experiencia se vive desde adentro."
+    ]
+  },
 ]
 
 const MEMBROS_PATH = "/miembros"
 
 function getMembrosUrl(quantity: number) {
-  const q = Math.min(10, Math.max(1, quantity))
+  const q = Math.min(50, Math.max(1, quantity))
   return `${MEMBROS_PATH}?quantity=${q}`
 }
 
 export default function ObjectivesParticipationSection() {
   const router = useRouter()
-  const [quantity, setQuantity] = useState(3)
+  const [quantity, setQuantity] = useState(10)
   const [phases, setPhases] = useState<FundingPhase[]>(DEFAULT_PHASES)
   const [authChecking, setAuthChecking] = useState(false)
   /** Solo para mostrar en UI. Backend usa 0.1 USD en pruebas. */
@@ -153,7 +175,7 @@ export default function ObjectivesParticipationSection() {
   ]
 
   const handleQuantityChange = (value: number) => {
-    const newQuantity = Math.max(1, Math.min(10, value))
+    const newQuantity = Math.max(1, Math.min(50, value))
     setQuantity(newQuantity)
   }
 
@@ -313,7 +335,7 @@ export default function ObjectivesParticipationSection() {
               >
                 18 USD
               </p>
-              <div className="mt-auto flex items-end">
+              <div className="mt-auto flex flex-col items-end gap-2">
                 <Button 
                   type="button"
                   disabled={authChecking}
@@ -325,6 +347,9 @@ export default function ObjectivesParticipationSection() {
                 >
                   {authChecking ? "…" : "QUIERO SER PARTE"}
                 </Button>
+                <p className="text-white/60 text-xs sm:text-sm text-center w-full">
+                  Una forma simple de ser parte.
+                </p>
               </div>
               </div>
             </motion.div>
@@ -345,61 +370,42 @@ export default function ObjectivesParticipationSection() {
                   fontFamily: 'Montserrat, sans-serif',
                 }}
               >
-                Hasta <span className="font-bold">10 aportes <br></br> por persona</span>
+                <span className="font-bold">Aportar más de una vez</span>
               </p>
-              <div className="mt-auto flex flex-col md:flex-row items-stretch md:items-end justify-center gap-3 md:gap-3">
-                <div className="flex items-center justify-center gap-1.5 md:gap-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-1 md:p-1 w-full md:w-auto">
-                  <button
-                    onClick={() => handleQuantityChange(quantity - 1)}
-                    disabled={quantity <= 1}
-                    aria-label="Decrementar cantidad"
-                    className="flex items-center justify-center w-6 h-6 md:w-6 md:h-6 rounded text-white transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent touch-manipulation"
-                  >
-                    <ChevronLeft className="w-3 h-3 md:w-3 md:h-3 md:hidden" />
-                    <ChevronDown className="w-3 h-3 md:w-3 md:h-3 hidden md:block" />
-                  </button>
-                  <div className="flex flex-col items-center gap-0 min-w-[45px] md:min-w-[45px]">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={10}
-                      value={quantity}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        if (val === '') return
-                        handleQuantityChange(parseInt(val) || 1)
-                      }}
-                      onBlur={(e) => {
-                        const val = parseInt(e.target.value)
-                        if (!val || val < 1) handleQuantityChange(1)
-                        else if (val > 10) handleQuantityChange(10)
-                      }}
-                      aria-label="Cantidad de aportes"
-                      className="w-10 md:w-10 h-7 md:h-7 text-center text-white text-lg md:text-[16px] font-semibold bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none p-0"
-                    />
-                    <span className="text-white/60 text-md md:text-[10px] font-normal leading-tight">
-                      {quantity === 1 ? 'aporte' : 'aportes'}
+              <div className="mt-auto flex flex-col gap-4 w-full">
+                <div className="w-full">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white/80 text-sm font-medium">
+                      {quantity} {quantity === 1 ? 'aporte' : 'aportes'}
+                    </span>
+                    <span className="text-white text-lg font-bold">
+                      {totalAmount} USD
                     </span>
                   </div>
-                  <button
-                    onClick={() => handleQuantityChange(quantity + 1)}
-                    disabled={quantity >= 10}
-                    aria-label="Incrementar cantidad"
-                    className="flex items-center justify-center w-6 h-6 md:w-6 md:h-6 rounded text-white transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent touch-manipulation"
-                  >
-                    <ChevronRight className="w-3 h-3 md:w-3 md:h-3 md:hidden" />
-                    <ChevronUp className="w-3 h-3 md:w-3 md:h-3 hidden md:block" />
-                  </button>
+                  <input
+                    type="range"
+                    min={1}
+                    max={50}
+                    value={quantity}
+                    onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
+                    className="w-full h-4 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, rgba(202, 0, 145, 0.8) 0%, rgba(202, 0, 145, 0.8) ${((quantity - 1) / 49) * 100}%, rgba(255, 255, 255, 0.2) ${((quantity - 1) / 49) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
+                    }}
+                  />
                 </div>
                 <Button 
                   type="button"
                   disabled={authChecking}
                   onClick={() => goToPay(quantity)}
-                  className="font-semibold hover:bg-gray-100 bg-white text-black text-sm md:text-base px-4 md:px-6 py-3 md:py-3 h-12 md:h-12 transition-all duration-200 active:scale-95 touch-manipulation w-full md:w-auto"
+                  className="font-semibold hover:bg-gray-100 bg-white text-black text-sm md:text-base px-4 md:px-6 py-3 md:py-3 h-12 md:h-12 transition-all duration-200 active:scale-95 touch-manipulation w-full"
                 >
                   {authChecking ? "…" : `QUIERO APORTAR ${totalAmount} USD`}
                 </Button>
               </div>
+                <p className="text-white/60 text-xs sm:text-sm text-center w-full mt-2">
+                  Podés aportar más de una vez si querés participar con mayor alcance.
+                </p>
               </div>
             </motion.div>
           </motion.div>
@@ -429,31 +435,31 @@ export default function ObjectivesParticipationSection() {
                   fontFamily: 'Montserrat, sans-serif',
                 }}
               >
-                Los fondos se destinan exclusivamente a estos dos objetivos. Una vez cumplida la primer fase, se activará
-                la segunda etapa condicional de 200.000 USD para financiar el viaje de Víctor Hugo al Mundial junto a su
-                equipo.
+                Este proyecto tiene dos grandes pasos. Primero, hacer posible la transmisión. Después, intentar llevarla más lejos. Todo lo que se reúna se destina exclusivamente a eso: que el Mundial vuelva a escucharse y, si se puede, también a vivirlo desde adentro. Es un recorrido que se construye entre todos.
               </p>
 
               {/* Transmisión por AM750 */}
-              <p className="text-white">
-                <span 
-                  className="text-[20px] sm:text-[22px] md:text-[24px] leading-[105%] tracking-normal font-black"
-                  style={{
-                    fontFamily: 'Montserrat, sans-serif',
-                  }}
-                >
-                  Transmision por AM750
-                </span>
-                <span 
-                  className="text-white/70 text-sm sm:text-base leading-[118%] tracking-normal font-normal ml-2"
-                  style={{
-                    fontFamily: 'Montserrat, sans-serif',
-                  }}
-                >
+              <div className="mt-6 sm:mt-8">
+                <p className="text-white">
+                  <span 
+                    className="text-[20px] sm:text-[22px] md:text-[24px] leading-[105%] tracking-normal font-black"
+                    style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                    }}
+                  >
+                    Transmisión por AM750
+                  </span>
                   <br />
-                  {' '}con apoyo de la Asociación de <br /> Relatores del Fútbol Argentino
-                </span>
-              </p>
+                  <span 
+                    className="text-white/70 text-sm sm:text-base leading-[118%] tracking-normal font-normal"
+                    style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                    }}
+                  >
+                    Con el acompañamiento de la Asociación de Relatores del Fútbol Argentino
+                  </span>
+                </p>
+              </div>
             </motion.div>
 
             {/* Columna derecha: Fases */}
@@ -497,26 +503,34 @@ export default function ObjectivesParticipationSection() {
                           color: '#ffffff',
                         }}
                       >
-                        {phase.title}
+                        {phase.title} — {phase.amount}
                       </h4>
                       <p 
-                        className="mb-1 text-lg sm:text-xl leading-[128%] tracking-normal font-normal text-white opacity-100"
+                        className="mb-3 text-base sm:text-lg md:text-xl leading-[128%] tracking-normal font-bold text-white opacity-100"
                         style={{
                           fontFamily: 'Montserrat, sans-serif',
                           color: '#ffffff',
                         }}
                       >
-                        {phase.amount}
-                      </p>
-                      <p 
-                        className="text-base sm:text-lg md:text-xl leading-[128%] tracking-normal font-normal opacity-90 text-white"
-                        style={{
-                          fontFamily: 'Montserrat, sans-serif',
-                          color: 'rgba(255, 255, 255, 0.9)',
-                        }}
-                      >
                         {phase.description ?? ""}
                       </p>
+                      {phase.items && phase.items.length > 0 && (
+                        <ul className="space-y-2 text-base sm:text-lg md:text-xl leading-[128%] tracking-normal font-normal opacity-90 text-white list-none">
+                          {phase.items.map((item, index) => (
+                            <li 
+                              key={index}
+                              className="flex items-start"
+                              style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                color: 'rgba(255, 255, 255, 0.9)',
+                              }}
+                            >
+                              <span className="mr-2">–</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </motion.div>
                 ))}
