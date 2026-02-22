@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { captureOrder } from "@/lib/paypal"
+import { notifyPayPalApproved } from "@/lib/notify-paypal-approved"
 
 /**
  * Captura una orden de PayPal tras el retorno del usuario.
@@ -89,6 +90,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    await notifyPayPalApproved(payment.id)
 
     return NextResponse.json({
       ok: true,

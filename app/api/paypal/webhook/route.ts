@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { verifyPayPalWebhook } from "@/lib/paypal-verify-webhook"
+import { notifyPayPalApproved } from "@/lib/notify-paypal-approved"
 
 type WebhookEvent = {
   id?: string
@@ -92,6 +93,10 @@ export async function POST(request: NextRequest) {
         { error: "Error al actualizar el pago" },
         { status: 500 }
       )
+    }
+
+    if (update.status === "approved") {
+      await notifyPayPalApproved(payment.id)
     }
 
     return NextResponse.json({
