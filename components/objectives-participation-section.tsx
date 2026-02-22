@@ -20,7 +20,6 @@ type FundingPhase = {
 const DEFAULT_PHASES: FundingPhase[] = [
   { id: "1", sort_order: 1, title: "FASE 01", amount: "200.000 USD", description: "Financiación de derechos de transmisión." },
   { id: "2", sort_order: 2, title: "FASE 02", amount: "200.000 USD", description: "Logística, viaje y cobertura." },
-  { id: "3", sort_order: 3, title: "FASE 03", amount: "200.000 USD", description: "Transmisión, Documental y legado" },
 ]
 
 const MEMBROS_PATH = "/miembros"
@@ -63,7 +62,9 @@ export default function ObjectivesParticipationSection() {
       .order("sort_order", { ascending: true })
       .then(({ data, error }) => {
         if (!error && data?.length) {
-          setPhases(data as FundingPhase[])
+          // Filtrar la fase 3
+          const filteredPhases = data.filter((phase) => phase.sort_order !== 3 && phase.id !== "3")
+          setPhases(filteredPhases as FundingPhase[])
         }
       })
   }, [])
@@ -172,6 +173,83 @@ export default function ObjectivesParticipationSection() {
       <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black via-black/50 to-transparent z-[1] h-[200px] sm:h-[300px] md:h-[400px] pointer-events-none"></div>
 
       <div className="container mx-auto relative z-10 max-w-6xl">
+        {/* ¿De qué se trata? */}
+        <motion.div
+          id="de-que-se-trata"
+          className="mb-12 sm:mb-16 md:mb-20 scroll-mt-20"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeInUpVariants}
+        >
+          <motion.h2
+            className="text-white mb-6 sm:mb-8 text-left font-montserrat font-black text-[32px] sm:text-[42px] md:text-[56px] leading-[105%] tracking-normal"
+            style={{
+              fontFamily: 'Montserrat, sans-serif',
+            }}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUpVariants}
+          >
+            ¿De qué se trata?
+          </motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 items-start relative z-20">
+            {/* Video Side */}
+            <motion.div
+              className="relative w-full order-1 md:order-1"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={slideInLeftVariants}
+            >
+              <div className="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
+                <video
+                  src="/video/videoplayback.mp4"
+                  controls
+                  controlsList="nodownload"
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                >
+                  Tu navegador no soporta el elemento de video.
+                </video>
+              </div>
+            </motion.div>
+            
+            {/* Text Side */}
+            <motion.div
+              className="space-y-4 sm:space-y-5 md:space-y-6 order-2 md:order-2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerContainerVariants}
+            >
+              <motion.p
+                className="text-white text-base sm:text-lg md:text-xl leading-relaxed"
+                variants={staggerItemVariants}
+              >
+                Durante décadas, millones de personas compartimos goles, finales, alegrías y derrotas con una misma voz.
+              </motion.p>
+              <motion.p
+                className="text-white text-base sm:text-lg md:text-xl leading-relaxed"
+                variants={staggerItemVariants}
+              >
+                Hoy esa voz puede volver a relatar un Mundial.
+                Pero no desde un esquema tradicional, sino desde algo mucho más raro y más lindo:
+                una <span className="font-bold text-white">comunidad</span> que decide hacerlo posible.
+              </motion.p>
+              <motion.p
+                className="text-white text-base sm:text-lg md:text-xl leading-relaxed"
+                variants={staggerItemVariants}
+              >
+                El proyecto es simple y extraordinario a la vez:
+                que los <span className="font-bold text-white">oyentes</span> financien colectivamente los derechos de transmisión del <span className="font-bold text-white">Mundial 2026</span> para que podamos volver a compartir los partidos de la <span className="font-bold text-white">Selección Argentina</span>.
+              </motion.p>
+            </motion.div>
+          </div>
+        </motion.div>
+
         {/* Cómo participar */}
         <motion.div
           id="como-funciona"
@@ -191,8 +269,17 @@ export default function ObjectivesParticipationSection() {
             viewport={{ once: true }}
             variants={fadeInUpVariants}
           >
-            Cómo participar
+            ¿Cómo participar?
           </motion.h2>
+          <motion.p
+            className="text-white mb-6 sm:mb-8 text-base sm:text-lg md:text-xl leading-relaxed"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUpVariants}
+          >
+            Podés sumarte con un <span className="font-bold">aporte único</span> o <span className="font-bold">aportar más de una vez</span>. Así participás de un proyecto colectivo para hacer posible la transmisión del <span className="font-bold">Mundial 2026</span>.
+          </motion.p>
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mb-12 sm:mb-16 md:mb-20"
             initial="hidden"
@@ -236,7 +323,7 @@ export default function ObjectivesParticipationSection() {
                     background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                   }}
                 >
-                  {authChecking ? "…" : "QUIERO APORTAR 18 USD"}
+                  {authChecking ? "…" : "QUIERO SER PARTE"}
                 </Button>
               </div>
               </div>

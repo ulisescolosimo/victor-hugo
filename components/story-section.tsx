@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useCallback, useState, useRef } from "react"
+import React, { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 
@@ -17,9 +16,7 @@ function getMembrosUrl(quantity: number) {
 
 export function StorySection() {
   const router = useRouter()
-  const [isPlaying, setIsPlaying] = useState(false)
   const [authChecking, setAuthChecking] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   const goToAportar = useCallback(async () => {
     setAuthChecking(true)
@@ -37,12 +34,6 @@ export function StorySection() {
     }
   }, [router])
 
-  const handlePlay = () => {
-    if (videoRef.current) {
-      videoRef.current.play()
-      setIsPlaying(true)
-    }
-  }
   // Variantes de animación para la imagen
   const imageVariants = {
     hidden: { opacity: 0, x: -50 },
@@ -136,19 +127,23 @@ export function StorySection() {
                 className="text-white/90 text-base sm:text-lg md:text-lg leading-relaxed"
                 variants={paragraphVariants}
               >
-                Durante el Mundial 2026 (México, Estados Unidos y Canadá),{" "}
-                <span className="font-bold text-white">Victor Hugo</span> —la voz más icónica del fútbol en habla hispana—
-                podría relatar por última vez los partidos de la Selección.
+                Hay ideas que no nacen en una empresa.
+                Nacen en una <span className="font-bold text-white">comunidad</span>.
               </motion.p>
               <motion.p
                 className="text-white/90 text-base sm:text-lg md:text-lg leading-relaxed"
                 variants={paragraphVariants}
               >
-                Queremos lograrlo entre todos:{" "}
-                <span className="font-bold text-white">
-                  financiar colectivamente los derechos oficiales de transmisión radial y, si llegamos a la segunda
-                  meta, llevar a Víctor Hugo y su equipo a los estadios.
-                </span>
+                Esta es una de ellas: intentar que <span className="font-bold text-white">Víctor Hugo</span> pueda relatar un <span className="font-bold text-white">Mundial</span> más.
+                No desde un contrato. No desde una corporación.
+                Sino desde la <span className="font-bold text-white">gente</span> que lo escuchó toda la vida.
+              </motion.p>
+              <motion.p
+                className="text-white/90 text-base sm:text-lg md:text-lg leading-relaxed"
+                variants={paragraphVariants}
+              >
+                Si esto sucede, no será un logro individual.
+                Será una transmisión hecha, literalmente, por los <span className="font-bold text-white">oyentes</span>.
               </motion.p>
               
               {/* CTA Buttons */}
@@ -167,7 +162,7 @@ export function StorySection() {
                     fontFamily: 'Montserrat, sans-serif',
                   }}
                 >
-                  {authChecking ? "Un momento…" : "Quiero aportar 18 USD"}
+                  {authChecking ? "Un momento…" : "Quiero ser parte"}
                 </Button>
                 <Button
                   size="sm"
@@ -201,40 +196,6 @@ export function StorySection() {
             </motion.div>
           </div>
         </div>
-
-        {/* Video local */}
-        <motion.div
-          className="mt-8 sm:mt-10 md:mt-12"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={textVariants}
-        >
-          <div className="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 shadow-2xl">
-            <video
-              ref={videoRef}
-              src="/video/videoplayback.mp4"
-              controls={isPlaying}
-              className="w-full h-full object-cover"
-              style={{ filter: "brightness(0.95) contrast(1.05)" }}
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-            >
-              Tu navegador no soporta el elemento de video.
-            </video>
-            {!isPlaying && (
-              <button
-                onClick={handlePlay}
-                className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors duration-200 z-10"
-                aria-label="Reproducir video"
-              >
-                <div className="bg-black rounded-full p-4 sm:p-5 md:p-6 shadow-lg hover:scale-110 transition-transform duration-200">
-                  <Play className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white fill-white ml-1" />
-                </div>
-              </button>
-            )}
-          </div>
-        </motion.div>
       </div>
     </section>
   )

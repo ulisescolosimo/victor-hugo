@@ -6,6 +6,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    turbopackFileSystemCache: true, // (o el flag equivalente que estés usando)
+  },
 }
 
 export default nextConfig

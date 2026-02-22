@@ -148,9 +148,9 @@ export function HeroSection() {
                     textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.7)'
                   }}
                 >
-                  Llevemos a <strong>Victor Hugo</strong> al Mundial 2026. Financiado por los oyentes.{" "}
-                  <br className="block sm:hidden" />
-                  <strong>Producido por los oyentes.</strong>
+                  Una transmisión hecha por los oyentes.{" "}
+                  <br className="block" />
+                  Relatada por <strong>Víctor Hugo Morales</strong>.
                 </motion.p>
 
                 {/* CTA Buttons */}
@@ -166,7 +166,7 @@ export function HeroSection() {
                       fontFamily: 'Montserrat, sans-serif',
                     }}
                   >
-                    {authChecking ? "Un momento…" : "Quiero aportar 18 USD"}
+                    {authChecking ? "Un momento…" : "QUIERO SER PARTE"}
                   </Button>
                   <Button
                     size="lg"

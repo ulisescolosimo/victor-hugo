@@ -352,7 +352,7 @@ export function Header() {
                 {/* Footer del menú con información adicional */}
                 <div className="px-4 pb-6 pt-4 border-t border-white/10 flex-shrink-0">
                   <p className="text-xs text-white/50 text-center px-4">
-                    El Último Mundial 2026
+                    El Último Mundial 2026 - Victor Hugo Morales
                   </p>
                 </div>
               </SheetContent>
