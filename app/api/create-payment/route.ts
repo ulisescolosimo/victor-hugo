@@ -4,9 +4,12 @@ import { getUsdToArsRate } from "@/lib/get-usd-ars-rate"
 import { MercadoPagoConfig, Preference } from "mercadopago"
 import { createOrder } from "@/lib/paypal"
 
-const UNIT_PRICE_USD = 0.1
+/** Precio por aporte en USD. PayPal cobra en USD; Mercado Pago convierte a ARS con cotización del día. */
+const UNIT_PRICE_USD = 18
+/** Porcentaje que se agrega al valor por plataforma de pagos (se suma al precio final). */
+const PLATFORM_FEE_PERCENT = 12
 const MIN_QUANTITY = 1
-const MAX_QUANTITY = 10
+const MAX_QUANTITY = 50
 
 function getSiteUrl(request: NextRequest): string {
   const url = process.env.NEXT_PUBLIC_SITE_URL
@@ -28,7 +31,8 @@ export async function POST(request: NextRequest) {
     const quantity = Math.min(MAX_QUANTITY, Math.max(MIN_QUANTITY, Number(body?.quantity) || 1))
     const provider = body?.provider === "paypal" ? "paypal" : "mercadopago"
 
-    const amountUsd = quantity * UNIT_PRICE_USD
+    const amountUsdBeforeFee = quantity * UNIT_PRICE_USD
+    const amountUsd = amountUsdBeforeFee * (1 + PLATFORM_FEE_PERCENT / 100)
     const { rate: usdToArsRate } = await getUsdToArsRate()
     const amountArs = Math.round(amountUsd * usdToArsRate)
 
@@ -69,10 +73,11 @@ export async function POST(request: NextRequest) {
           quantity === 1
             ? `1 Aporte - Proyecto VHM`
             : `${quantity} Aportes - Proyecto VHM`
+        const unitWithFee = UNIT_PRICE_USD * (1 + PLATFORM_FEE_PERCENT / 100)
         const { orderId, approveUrl } = await createOrder({
           paymentId: payment.id,
           amountUsd,
-          description: `${description} - ${quantity} x ${UNIT_PRICE_USD} USD`,
+          description: `${description} - ${quantity} x ${unitWithFee.toFixed(2)} USD (incl. ${PLATFORM_FEE_PERCENT}% plataforma)`,
           returnUrl: `${siteUrl}/miembros?payment=success&payment_id=${payment.id}`,
           cancelUrl: `${siteUrl}/miembros?payment=cancelled&payment_id=${payment.id}`,
           brandName: "Proyecto VHM",
@@ -120,7 +125,7 @@ export async function POST(request: NextRequest) {
           {
             id: payment.id,
             title,
-            description: `Aporte${quantity > 1 ? "s" : ""} al Proyecto Victor Hugo Mora - ${quantity} x ${UNIT_PRICE_USD} USD`,
+            description: `Aporte${quantity > 1 ? "s" : ""} al Proyecto Victor Hugo Mora - ${quantity} x ${UNIT_PRICE_USD} USD + ${PLATFORM_FEE_PERCENT}% plataforma`,
             quantity: 1,
             unit_price: amountArs,
             currency_id: "ARS",
