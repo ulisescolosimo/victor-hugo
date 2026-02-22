@@ -20,7 +20,7 @@ import {
 import { SiMercadopago, SiPaypal } from "@icons-pack/react-simple-icons"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
 import {
   Card,
   CardContent,
@@ -737,62 +737,60 @@ function MiembrosContent() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-2">
+                  {/* Selector cantidad: slider 1–10, valor visible, accesible y táctil */}
+                  <div
+                    id="quantity-input"
+                    className="space-y-4"
+                    role="group"
+                    aria-labelledby="quantity-label"
+                    aria-describedby="quantity-hint total-usd"
+                  >
                     <label
-                      htmlFor="quantity-input"
-                      className="text-sm font-medium text-zinc-300"
+                      id="quantity-label"
+                      className="text-sm font-medium text-zinc-300 block"
                     >
                       Cantidad de aportes (1–10)
                     </label>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => setQuantity((q) => clampQuantity(q - 1))}
-                        disabled={quantity <= 1 || paymentLoading}
-                        aria-label="Menos aportes"
-                        className="h-10 w-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white"
-                      >
-                        <ChevronDown className="size-4" />
-                      </Button>
-                      <Input
-                        id="quantity-input"
-                        type="number"
-                        min={1}
-                        max={10}
-                        value={quantity}
-                        onChange={(e) => {
-                          const raw = e.target.value
-                          if (raw === "") return
-                          const n = parseInt(raw, 10)
-                          setQuantity(clampQuantity(isNaN(n) ? 1 : n))
-                        }}
-                        onBlur={(e) => {
-                          const n = parseInt(e.target.value, 10)
-                          if (e.target.value === "" || isNaN(n) || n < 1)
-                            setQuantity(1)
-                          else if (n > 10) setQuantity(10)
-                        }}
-                        disabled={paymentLoading}
-                        aria-describedby="quantity-hint total-usd"
-                        className="h-10 w-20 text-center text-white bg-white/5 border-white/10 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      />
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => setQuantity((q) => clampQuantity(q + 1))}
-                        disabled={quantity >= 10 || paymentLoading}
-                        aria-label="Más aportes"
-                        className="h-10 w-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white"
-                      >
-                        <ChevronUp className="size-4" />
-                      </Button>
+
+                    {/* Valor actual siempre visible (grande, claro) */}
+                    <p
+                      className="text-2xl sm:text-3xl font-bold text-white tabular-nums"
+                      aria-live="polite"
+                      aria-atomic="true"
+                    >
+                      {quantity} {quantity === 1 ? "aporte" : "aportes"}
+                    </p>
+
+                    {/* Slider: track alto, thumb >= 28px, paso 1, snap enteros */}
+                    <Slider
+                      min={1}
+                      max={10}
+                      step={1}
+                      value={[quantity]}
+                      onValueChange={(v) =>
+                        setQuantity(clampQuantity(v[0] ?? quantity))
+                      }
+                      disabled={paymentLoading}
+                      aria-label="Cantidad de aportes, de 1 a 10"
+                      className="w-full py-3 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-track]]:rounded-full [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:bg-white/20 [&_[data-slot=slider-thumb]]:size-7 [&_[data-slot=slider-thumb]]:rounded-full [&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-white/30 [&_[data-slot=slider-thumb]]:bg-zinc-100 [&_[data-slot=slider-thumb]]:shadow-lg [&_[data-slot=slider-thumb]]:transition-transform [&_[data-slot=slider-thumb]]:duration-150 motion-reduce:[&_[data-slot=slider-thumb]]:transition-none focus-visible:[&_[data-slot=slider-thumb]]:ring-4 focus-visible:[&_[data-slot=slider-thumb]]:ring-white/30 focus-visible:[&_[data-slot=slider-thumb]]:outline-none data-[disabled]:opacity-50"
+                    />
+
+                    {/* Marcas mínimas: 1 y 10 en los extremos */}
+                    <div className="flex justify-between text-xs text-zinc-500 px-0.5">
+                      <span aria-hidden>1</span>
+                      <span aria-hidden>10</span>
                     </div>
-                    <p id="quantity-hint" className="text-xs text-zinc-500">
+
+                    {/* Total y hint (desktop: puede ir en fila; mobile: stack) */}
+                    <p
+                      id="quantity-hint"
+                      className="text-xs text-zinc-500 flex flex-wrap items-baseline gap-x-1"
+                    >
                       Total:{" "}
-                      <span id="total-usd" className="font-medium text-zinc-300">
+                      <span
+                        id="total-usd"
+                        className="font-medium text-zinc-300 text-sm"
+                      >
                         {(quantity * DISPLAY_CONTRIBUTION_USD).toFixed(2)} USD
                       </span>
                       . Se cobrará en ARS al TC del día.
