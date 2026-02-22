@@ -1,38 +1,10 @@
 "use client"
 
-import React, { useCallback, useState } from "react"
-import { useRouter } from "next/navigation"
+import React from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/client"
-
-const MEMBROS_PATH = "/miembros"
-
-function getMembrosUrl(quantity: number) {
-  const q = Math.min(10, Math.max(1, quantity))
-  return `${MEMBROS_PATH}?quantity=${q}`
-}
 
 export function StorySection() {
-  const router = useRouter()
-  const [authChecking, setAuthChecking] = useState(false)
-
-  const goToAportar = useCallback(async () => {
-    setAuthChecking(true)
-    try {
-      const client = createClient()
-      const { data: { user } } = await client.auth.getUser()
-      const targetUrl = getMembrosUrl(1)
-      if (!user) {
-        router.push("/login?redirect=" + encodeURIComponent(targetUrl))
-        return
-      }
-      router.push(targetUrl)
-    } finally {
-      setAuthChecking(false)
-    }
-  }, [router])
 
   // Variantes de animación para la imagen
   const imageVariants = {
@@ -87,7 +59,7 @@ export function StorySection() {
   return (
     <section 
       id="sobre-proyecto"
-      className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8 scroll-mt-20"
+      className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8 scroll-mt-20 border-b border-white/10"
       style={{
         background: `linear-gradient(0deg, #000000, #000000),
           linear-gradient(0deg, rgba(0, 0, 0, 0.54), rgba(0, 0, 0, 0.54)),
@@ -145,54 +117,6 @@ export function StorySection() {
                 Si esto sucede, no será un logro individual.
                 Será una transmisión hecha, literalmente, por los <span className="font-bold text-white">oyentes</span>.
               </motion.p>
-              
-              {/* CTA Buttons */}
-              <motion.div
-                className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-5"
-                variants={paragraphVariants}
-              >
-                <Button
-                  size="sm"
-                  type="button"
-                  onClick={goToAportar}
-                  disabled={authChecking}
-                  className="w-full sm:w-auto min-w-[160px] px-4 sm:px-5 text-white uppercase hover:opacity-90 text-sm sm:text-base leading-[107%] tracking-normal font-medium disabled:opacity-70 disabled:pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
-                    fontFamily: 'Montserrat, sans-serif',
-                  }}
-                >
-                  {authChecking ? "Un momento…" : "Quiero ser parte"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  asChild
-                  className="w-full sm:w-auto min-w-[160px] border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-4 sm:px-5 uppercase text-sm sm:text-base leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
-                  style={{
-                    fontFamily: 'Montserrat, sans-serif',
-                  }}
-                >
-                  <a 
-                    href="#como-funciona"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      const element = document.getElementById('como-funciona')
-                      if (element) {
-                        const headerOffset = 80
-                        const elementPosition = element.getBoundingClientRect().top
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-                        window.scrollTo({
-                          top: offsetPosition,
-                          behavior: 'smooth'
-                        })
-                      }
-                    }}
-                  >
-                    Cómo funciona
-                  </a>
-                </Button>
-              </motion.div>
             </motion.div>
           </div>
         </div>

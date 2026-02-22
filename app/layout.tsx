@@ -5,14 +5,14 @@ import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
-const montserrat = Montserrat({ 
+const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
 })
 
 export const metadata: Metadata = {
   title: "El Último Mundial - Victor Hugo Morales",
-  description: "Una transmisión hecha por los oyentes. Relatada por Víctor Hugo Morales.",
+  description: "Una transmisión hecha por los oyentes. Relatada por Víctor Hugo Morales. Un mundial para todos.",
   generator: "v0.app",
   icons: {
     icon: [

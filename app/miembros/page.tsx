@@ -463,7 +463,7 @@ function MiembrosContent() {
       if (!user) {
         const q = searchParams.get("quantity")
         const redirectPath = q ? `/miembros?quantity=${q}` : "/miembros"
-        router.replace("/login?redirect=" + encodeURIComponent(redirectPath))
+        router.replace("/registro?redirect=" + encodeURIComponent(redirectPath))
         return
       }
       setAuthLoading(false)

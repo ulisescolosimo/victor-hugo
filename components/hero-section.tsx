@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Check } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { createClient } from "@/lib/supabase/client"
@@ -26,7 +25,7 @@ export function HeroSection() {
       const { data: { user } } = await client.auth.getUser()
       const targetUrl = getMembrosUrl(1)
       if (!user) {
-        router.push("/login?redirect=" + encodeURIComponent(targetUrl))
+        router.push("/registro?redirect=" + encodeURIComponent(targetUrl))
         return
       }
       router.push(targetUrl)
@@ -99,7 +98,7 @@ export function HeroSection() {
   }
   return (
     <section
-      className="relative w-full overflow-hidden bg-black bg-cover bg-center bg-no-repeat min-h-[80vh] sm:min-h-screen"
+      className="relative w-full overflow-hidden bg-black bg-cover bg-center bg-no-repeat min-h-[80vh] sm:min-h-screen border-b border-white/20"
       style={{
         backgroundImage: "url(/images/stadium-background.jpg)",
       }}
@@ -111,139 +110,96 @@ export function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
       ></motion.div>
-      
+
       {/* Content Container */}
-      <div className="relative z-50 flex flex-col min-h-[85vh] sm:min-h-screen pt-16 sm:pt-20 md:pt-24 lg:pt-0 lg:h-[90vh] lg:min-h-[90vh]">
+      <div className="relative z-50 flex flex-col min-h-[85vh] sm:min-h-screen pt-20 sm:pt-24 md:pt-28 lg:pt-10 lg:h-[90vh] lg:min-h-[90vh]">
         {/* Hero Content */}
         <div className="relative flex flex-1 justify-center items-end pb-0 h-full">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-6xl w-full pb-6 sm:pb-12 md:pb-16 lg:pb-16 self-end">
             {/* Left Content */}
             <div className="relative w-full">
-                <motion.h1
-                  className="mb-4 sm:mb-5 md:mb-6 text-white uppercase leading-[83%] tracking-normal text-[36px] sm:text-[48px] md:text-[64px] lg:text-[80px] xl:text-[100px]"
-                  style={{
-                    fontFamily: '"BBH Sans Hegarty", "Arial", sans-serif',
-                    fontWeight: 400,
-                    fontStyle: "normal",
-                  }}
-                  initial="hidden"
-                  animate="visible"
-                  variants={titleVariants}
-                >
-                  El
-                  <br />
-                  Ultimo
-                  <br />
-                  Mundial
-                </motion.h1>
+              <motion.h1
+                className="mb-4 sm:mb-5 md:mb-6 text-white uppercase leading-[83%] tracking-normal text-[36px] sm:text-[48px] md:text-[64px] lg:text-[80px] xl:text-[100px]"
+                style={{
+                  fontFamily: '"BBH Sans Hegarty", "Arial", sans-serif',
+                  fontWeight: 400,
+                  fontStyle: "normal",
+                }}
+                initial="hidden"
+                animate="visible"
+                variants={titleVariants}
+              >
+                El
+                <br />
+                Ultimo
+                <br />
+                Mundial
+              </motion.h1>
 
-                {/* Subtitle */}
-                <motion.p
-                  className="mb-6 sm:mb-7 md:mb-8 max-w-xl text-sm sm:text-base md:text-base lg:text-lg leading-relaxed text-white"
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeInUpVariants}
-                  transition={{ delay: 0.2 }}
+              {/* Subtitle */}
+              <motion.p
+                className="mb-6 sm:mb-7 md:mb-8 max-w-xl text-base sm:text-lg md:text-2xl leading-relaxed text-white"
+                initial="hidden"
+                animate="visible"
+                variants={fadeInUpVariants}
+                transition={{ delay: 0.2 }}
+                style={{
+                  textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.7)'
+                }}
+              >
+                Una transmisión hecha por los oyentes.{" "}
+                <br className="block" />
+                Relatada por <strong>Víctor Hugo Morales</strong>.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
+                <Button
+                  size="lg"
+                  type="button"
+                  onClick={goToAportar}
+                  disabled={authChecking}
+                  className="cursor-pointer w-full sm:w-auto sm:min-w-[180px] px-4 py-3 sm:px-6 md:px-7 text-white uppercase hover:opacity-90 text-sm sm:text-base md:text-lg leading-[107%] tracking-normal font-medium disabled:opacity-70 disabled:pointer-events-none h-11 sm:h-12 md:h-12"
                   style={{
-                    textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.7)'
+                    background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
+                    fontFamily: 'Montserrat, sans-serif',
                   }}
                 >
-                  Una transmisión hecha por los oyentes.{" "}
-                  <br className="block" />
-                  Relatada por <strong>Víctor Hugo Morales</strong>.
-                </motion.p>
-
-                {/* CTA Buttons */}
-                <div className="mb-8 sm:mb-9 md:mb-10 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
-                  <Button
-                    size="lg"
-                    type="button"
-                    onClick={goToAportar}
-                    disabled={authChecking}
-                    className="w-full sm:w-auto sm:min-w-[200px] px-4 py-2 sm:px-6 md:px-8 text-white uppercase hover:opacity-90 text-sm sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium disabled:opacity-70 disabled:pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
-                      fontFamily: 'Montserrat, sans-serif',
+                  {authChecking ? "Un momento…" : "QUIERO SER PARTE"}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  asChild
+                  className="cursor-pointer w-full sm:w-auto sm:min-w-[180px] border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-4 py-3 sm:px-6 md:px-7 uppercase text-sm sm:text-base md:text-lg leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black h-11 sm:h-12 md:h-12"
+                  style={{
+                    fontFamily: 'Montserrat, sans-serif',
+                  }}
+                >
+                  <a
+                    href="#como-funciona"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      const element = document.getElementById('como-funciona')
+                      if (element) {
+                        const headerOffset = 80
+                        const elementPosition = element.getBoundingClientRect().top
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                        window.scrollTo({
+                          top: offsetPosition,
+                          behavior: 'smooth'
+                        })
+                      }
                     }}
                   >
-                    {authChecking ? "Un momento…" : "QUIERO SER PARTE"}
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    asChild
-                    className="w-full sm:w-auto sm:min-w-[200px] border-2 border-white bg-white text-black sm:bg-transparent sm:text-white px-4 py-2 sm:px-6 md:px-8 uppercase text-sm sm:text-lg md:text-xl leading-[107%] tracking-normal font-medium sm:hover:bg-white sm:hover:text-black"
-                    style={{
-                      fontFamily: 'Montserrat, sans-serif',
-                    }}
-                  >
-                    <a 
-                      href="#como-funciona"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        const element = document.getElementById('como-funciona')
-                        if (element) {
-                          const headerOffset = 80
-                          const elementPosition = element.getBoundingClientRect().top
-                          const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-                          window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                          })
-                        }
-                      }}
-                    >
-                      Cómo funciona
-                    </a>
-                  </Button>
-                </div>
-
-                {/* Verification Checkmarks */}
-                <div className="relative z-40 hidden sm:flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-x-4 md:gap-x-6 gap-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shrink-0">
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    </div>
-                    <span 
-                      className="text-sm sm:text-sm md:text-base text-white"
-                      style={{
-                        textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)'
-                      }}
-                    >
-                      Aportes verificados
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shrink-0">
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    </div>
-                    <span 
-                      className="text-sm sm:text-sm md:text-base text-white"
-                      style={{
-                        textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)'
-                      }}
-                    >
-                      Reembolsable si no se alcanza la Fase 1
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shrink-0">
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    </div>
-                    <span 
-                      className="text-sm sm:text-sm md:text-base text-white"
-                      style={{
-                        textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)'
-                      }}
-                    >
-                      Transparencia en tiempo real
-                    </span>
-                  </div>
-                </div>
+                    Cómo funciona
+                  </a>
+                </Button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
       {/* Right Image - Posicionada relativo a la sección completa, pegada al fondo */}
       {/* Mobile: visible, Tablet: visible con ajuste, Desktop: posición original */}
