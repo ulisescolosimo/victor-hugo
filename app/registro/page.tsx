@@ -144,13 +144,21 @@ function RegistroContent() {
       <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-24 min-h-[100vh] flex items-center">
         <div className="container mx-auto px-4 sm:px-6 md:px-4 max-w-6xl pt-12">
           <motion.h1
-            className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 text-white tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-4 sm:mb-6 text-white tracking-tight"
             initial="hidden"
             animate="visible"
             variants={fadeInUpVariants}
           >
-            Crear cuenta
+            Crear tu cuenta
           </motion.h1>
+          <motion.p
+            className="text-white/80 text-sm sm:text-base text-center max-w-lg mx-auto mb-8 sm:mb-12 leading-relaxed"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUpVariants}
+          >
+            Para participar en El Último Mundial necesitás crear una cuenta. Desde ahí vas a recibir las novedades, acceder a contenido y espacios privados, y seguir el proyecto de cerca.
+          </motion.p>
 
           <motion.div
             className="rounded-lg max-w-md mx-auto relative"
@@ -179,7 +187,7 @@ function RegistroContent() {
                   className="w-full h-11 rounded-lg border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white flex items-center justify-center gap-2"
                 >
                   <GoogleIcon />
-                  {loadingGoogle ? "Conectando…" : "Continuar con Google"}
+                  {loadingGoogle ? "Conectando…" : "Crear cuenta con Google"}
                 </Button>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -255,7 +263,7 @@ function RegistroContent() {
                     <Input
                       id="reg-confirm"
                       type="password"
-                      placeholder="Repite tu contraseña"
+                      placeholder="Repetí tu contraseña"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       autoComplete="new-password"
@@ -268,16 +276,19 @@ function RegistroContent() {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold text-base h-11 rounded-lg"
                 >
-                  {loading ? "Creando cuenta…" : "Registrarme"}
+                  {loading ? "Creando cuenta…" : "Crear mi cuenta"}
                 </Button>
               </form>
+              <p className="mt-4 text-white/60 text-xs text-center">
+                Usamos tu cuenta solo para gestionar tu participación y enviarte novedades del proyecto.
+              </p>
               <p className="mt-6 text-center text-white/70 text-sm">
-                ¿Ya tienes cuenta?{" "}
+                ¿Ya tenés cuenta?{" "}
                 <Link
                   href={redirectTo !== "/" ? "/login?redirect=" + encodeURIComponent(redirectTo) : "/login"}
                   className="text-pink-400 hover:text-pink-300 font-medium underline-offset-2 hover:underline"
                 >
-                  Inicia sesión
+                  Iniciá sesión
                 </Link>
               </p>
             </div>

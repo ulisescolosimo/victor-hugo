@@ -119,14 +119,14 @@ export function Header() {
                   onClick={(e) => handleSmoothScroll(e, 'como-funciona')}
                   className="text-sm text-white transition-colors hover:text-pink-500"
                 >
-                  Cómo funciona
+                  Cómo participar
                 </a>
                 <a 
                   href="#financiamiento" 
                   onClick={(e) => handleSmoothScroll(e, 'financiamiento')}
                   className="text-sm text-white transition-colors hover:text-pink-500"
                 >
-                  Financiamiento
+                  Objetivo
                 </a>
               </>
             )}
@@ -171,7 +171,7 @@ export function Header() {
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href="/registro"
                   className="text-sm text-white transition-colors hover:text-pink-500"
                 >
                   Iniciar sesión
@@ -180,7 +180,7 @@ export function Header() {
                   href="/registro"
                   className="text-sm font-medium text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 px-4 py-2 rounded-lg transition-all"
                 >
-                  Registro
+                  Sumarse
                 </Link>
               </>
             )}
@@ -267,7 +267,7 @@ export function Header() {
                             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
                               <HelpCircle className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
                             </div>
-                            <span className="font-medium">Cómo funciona</span>
+                            <span className="font-medium">Cómo participar</span>
                           </div>
                           <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
                         </a>
@@ -280,7 +280,7 @@ export function Header() {
                             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
                               <DollarSign className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
                             </div>
-                            <span className="font-medium">Financiamiento</span>
+                            <span className="font-medium">Objetivo</span>
                           </div>
                           <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
                         </a>
@@ -332,7 +332,7 @@ export function Header() {
                     ) : (
                       <>
                         <Link
-                          href="/login"
+                          href="/registro"
                           onClick={() => setIsSheetOpen(false)}
                           className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
                         >
@@ -353,7 +353,7 @@ export function Header() {
                             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
                               <UserPlus className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
                             </div>
-                            <span className="font-medium">Registro</span>
+                            <span className="font-medium">Sumarse</span>
                           </div>
                           <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
                         </Link>
@@ -365,7 +365,7 @@ export function Header() {
                 {/* Footer del menú con información adicional */}
                 <div className="px-4 pb-6 pt-4 border-t border-white/10 flex-shrink-0">
                   <p className="text-xs text-white/50 text-center px-4">
-                    El Último Mundial 2026
+                    El Último Mundial 2026 - Victor Hugo Morales
                   </p>
                 </div>
               </SheetContent>

@@ -116,7 +116,7 @@ export default function ContactSection() {
       {/* Sección Proyecto 18 */}
       <Project18Section />
       
-      <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-24">
+      <section className="relative bg-[#1a1a1a] py-12 sm:py-16 md:py-24 border-b border-white/10">
       <div className="container mx-auto px-4 sm:px-6 md:px-4 max-w-6xl">
         {/* Heading */}
         <motion.h2
@@ -126,7 +126,7 @@ export default function ContactSection() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeInUpVariants}
         >
-          Financiado por los oyentes. <br></br> Relatado por Víctor Hugo.
+          Una transmisión hecha por los oyentes. <br></br> Relatada por Víctor Hugo Morales.
         </motion.h2>
 
         {/* Main Card */}
@@ -168,10 +168,10 @@ export default function ContactSection() {
                     letterSpacing: '0%'
                   }}
                 >
-                  Más que un financiamiento, este proyecto es un acto de gratitud colectiva.
+                  Este proyecto existe si lo hacemos juntos.
                 </h3>
-                <p 
-                  className="text-white/90 font-sans"
+                <div
+                  className="text-white/90 font-sans space-y-4"
                   style={{
                     fontFamily: 'Montserrat, sans-serif',
                     fontWeight: 400,
@@ -180,9 +180,14 @@ export default function ContactSection() {
                     letterSpacing: '0%'
                   }}
                 >
-                  Una oportunidad para que los oyentes agradezcan a Víctor Hugo todo lo que nos dio: <b>su voz,
-                  su épica y sus palabras que se convirtieron en parte de nuestra historia.</b>
-                </p>
+                  <p>
+                    Llegaste hasta acá porque entendés de qué se trata <strong className="font-bold text-white">El Último Mundial</strong>.
+                    No es una compra ni una promesa: es una forma concreta de ser parte de una transmisión que solo puede existir con <strong className="font-bold text-white">una comunidad detrás</strong>.
+                  </p>
+                  <p>
+                    Desde este lugar vas a poder <strong className="font-bold text-white">participar</strong>, <strong className="font-bold text-white">seguir el proyecto de cerca</strong> y <strong className="font-bold text-white">recibir las novedades</strong> a medida que avance.
+                  </p>
+                </div>
               </motion.div>
 
               {/* Right Section - Formulario de registro */}
@@ -257,7 +262,7 @@ export default function ContactSection() {
                   <Input
                     id="contact-confirm"
                     type="password"
-                    placeholder="Repite tu contraseña"
+                    placeholder="Repetí tu contraseña"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     autoComplete="new-password"
@@ -270,8 +275,11 @@ export default function ContactSection() {
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold text-base sm:text-base md:text-lg h-11 sm:h-11 md:h-12 rounded-lg"
                   >
-                    {loading ? "Creando cuenta…" : "Quiero aportar"}
+                    {loading ? "Un momento…" : "Ser parte"}
                   </Button>
+                  <p className="text-white/60 text-sm mt-3 text-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    Al ser parte, vas a poder elegir cómo participar y seguir el proyecto desde adentro.
+                  </p>
                 </motion.div>
               </motion.form>
             </div>
