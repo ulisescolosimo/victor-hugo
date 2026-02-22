@@ -11,13 +11,13 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  CreditCard,
   Loader2,
   XCircle,
   HelpCircle,
   Coins,
   Calendar,
 } from "lucide-react"
+import { SiMercadopago, SiPaypal } from "@icons-pack/react-simple-icons"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,8 +32,6 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
 const MUNDIAL_DATE = new Date("2026-06-11T12:00:00Z")
 /** Valor real en backend (pruebas). No cambiar para cobros. */
 const CONTRIBUTION_UNIT_USD = 0.1
@@ -355,28 +353,6 @@ function RedirectAlert({
   )
 }
 
-type HistorialFilter = "todos" | "approved" | "pending" | "rejected"
-
-function filterPayments(
-  payments: Payment[],
-  filter: HistorialFilter
-): Payment[] {
-  switch (filter) {
-    case "approved":
-      return payments.filter((p) => p.status === "approved")
-    case "pending":
-      return payments.filter(
-        (p) => p.status === "pending" || p.status === "in_process"
-      )
-    case "rejected":
-      return payments.filter((p) =>
-        ["rejected", "cancelled", "refunded"].includes(p.status)
-      )
-    default:
-      return payments
-  }
-}
-
 function HistorialList({
   payments,
   loading,
@@ -405,8 +381,8 @@ function HistorialList({
       >
         <p className="text-zinc-400 mb-4">
           {totalPayments === 0
-            ? "Aún no tenés aportes."
-            : "No hay movimientos con este filtro."}
+            ? "Aún no tenés aportes acreditados."
+            : "No hay aportes acreditados."}
         </p>
         <Button
           asChild
@@ -472,7 +448,6 @@ function MiembrosContent() {
   const [paymentLoading, setPaymentLoading] = useState(false)
   const quantityParam = Math.min(10, Math.max(1, Number(searchParams.get("quantity")) || 1))
   const [quantity, setQuantity] = useState(quantityParam)
-  const [historialTab, setHistorialTab] = useState<HistorialFilter>("todos")
   const [redirectMessage, setRedirectMessage] = useState<{
     type: "success" | "failure" | "pending"
     text: string
@@ -841,7 +816,7 @@ function MiembrosContent() {
                         </>
                       ) : (
                         <>
-                          <CreditCard className="mr-2 size-4" aria-hidden />
+                          <SiMercadopago className="mr-2 size-5 shrink-0" aria-hidden />
                           Pagar con Mercado Pago
                         </>
                       )}
@@ -850,10 +825,10 @@ function MiembrosContent() {
                       onClick={handlePayWithPayPal}
                       disabled={paymentLoading}
                       variant="outline"
-                      className="w-full sm:w-auto border-[#0070ba] bg-[#0070ba]/10 hover:bg-[#0070ba]/20 text-[#0070ba] font-semibold h-11 px-6"
+                      className="w-full sm:w-auto border-[#0070ba] bg-[#0070ba]/10 text-[#0070ba] font-semibold h-11 px-6 hover:bg-[#0070ba]/20 hover:text-[#0070ba] focus-visible:ring-[#0070ba]/40"
                       size="lg"
                     >
-                      <CreditCard className="mr-2 size-4" aria-hidden />
+                      <SiPaypal className="mr-2 size-5 shrink-0" aria-hidden />
                       Pagar con PayPal
                     </Button>
                   </div>
@@ -861,7 +836,7 @@ function MiembrosContent() {
               </Card>
             </motion.div>
 
-            {/* Historial de pagos */}
+            {/* Historial de pagos (solo aprobados) */}
             <motion.div variants={fadeIn}>
               <GlassCard className="overflow-hidden">
                 <div className="p-6 border-b border-white/10">
@@ -869,73 +844,16 @@ function MiembrosContent() {
                     Historial de pagos
                   </h2>
                   <p className="text-sm text-zinc-400 mt-0.5">
-                    Todos tus movimientos
+                    Tus aportes acreditados
                   </p>
                 </div>
-                <Tabs
-                  value={historialTab}
-                  onValueChange={(v) =>
-                    setHistorialTab(v as HistorialFilter)
-                  }
-                  className="w-full"
-                >
-                  <div className="px-6 pt-4">
-                    <TabsList className="bg-white/5 border border-white/10 rounded-lg p-1 h-auto flex-wrap gap-1">
-                      <TabsTrigger
-                        value="todos"
-                        className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 rounded-md"
-                      >
-                        Todos
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="approved"
-                        className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 rounded-md"
-                      >
-                        Aprobados
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="pending"
-                        className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 rounded-md"
-                      >
-                        Pendientes
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="rejected"
-                        className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 rounded-md"
-                      >
-                        Rechazados
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-                  <TabsContent value="todos" className="mt-0 p-6 pt-4">
-                    <HistorialList
-                      payments={filterPayments(payments, "todos")}
-                      loading={paymentsLoading}
-                      totalPayments={payments.length}
-                    />
-                  </TabsContent>
-                  <TabsContent value="approved" className="mt-0 p-6 pt-4">
-                    <HistorialList
-                      payments={filterPayments(payments, "approved")}
-                      loading={paymentsLoading}
-                      totalPayments={payments.length}
-                    />
-                  </TabsContent>
-                  <TabsContent value="pending" className="mt-0 p-6 pt-4">
-                    <HistorialList
-                      payments={filterPayments(payments, "pending")}
-                      loading={paymentsLoading}
-                      totalPayments={payments.length}
-                    />
-                  </TabsContent>
-                  <TabsContent value="rejected" className="mt-0 p-6 pt-4">
-                    <HistorialList
-                      payments={filterPayments(payments, "rejected")}
-                      loading={paymentsLoading}
-                      totalPayments={payments.length}
-                    />
-                  </TabsContent>
-                </Tabs>
+                <div className="p-6 pt-4">
+                  <HistorialList
+                    payments={approvedPayments}
+                    loading={paymentsLoading}
+                    totalPayments={approvedPayments.length}
+                  />
+                </div>
               </GlassCard>
             </motion.div>
           </motion.div>

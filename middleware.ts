@@ -4,9 +4,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // No ejecutar lógica de auth en restablecer: preservar query params (code, type, etc.)
-  // para que la página pueda hacer exchangeCodeForSession sin que el middleware toque la request.
-  if (pathname === "/restablecer") {
+  // No ejecutar lógica de auth en restablecer ni en auth/callback: preservar query params (code, etc.)
+  // para que la página/route pueda hacer exchangeCodeForSession sin que el middleware toque la request.
+  if (pathname === "/restablecer" || pathname === "/auth/callback") {
     return NextResponse.next({
       request: { headers: request.headers },
     })
