@@ -171,7 +171,7 @@ export function Header() {
             ) : (
               <>
                 <Link
-                  href="/registro"
+                  href="/login"
                   className="text-sm text-white transition-colors hover:text-pink-500"
                 >
                   Iniciar sesión
@@ -332,7 +332,7 @@ export function Header() {
                     ) : (
                       <>
                         <Link
-                          href="/registro"
+                          href="/login"
                           onClick={() => setIsSheetOpen(false)}
                           className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
                         >

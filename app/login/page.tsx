@@ -65,9 +65,9 @@ const staggerItemVariants = (reduced: boolean) => ({
 })
 
 function getRedirectPath(redirect: string | null): string {
-  if (!redirect) return "/"
+  if (!redirect) return "/miembros"
   if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect
-  return "/"
+  return "/miembros"
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

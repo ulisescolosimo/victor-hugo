@@ -29,7 +29,9 @@ function EquipoSection({ teamMembers }: { teamMembers: TeamMember[] }) {
     const onSelect = () => setSelectedIndex(api.selectedScrollSnap())
     onSelect()
     api.on("select", onSelect)
-    return () => api.off("select", onSelect)
+    return () => {
+      api.off("select", onSelect)
+    }
   }, [api])
 
   return (

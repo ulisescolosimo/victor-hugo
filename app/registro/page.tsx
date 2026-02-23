@@ -62,9 +62,9 @@ const staggerItemVariants = {
 }
 
 function getRedirectPath(redirect: string | null): string {
-  if (!redirect) return "/"
+  if (!redirect) return "/miembros"
   if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect
-  return "/"
+  return "/miembros"
 }
 
 function RegistroContent() {

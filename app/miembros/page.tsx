@@ -20,7 +20,6 @@ import {
 import { SiMercadopago, SiPaypal } from "@icons-pack/react-simple-icons"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
 import {
   Card,
   CardContent,
@@ -751,7 +750,7 @@ function MiembrosContent() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Selector cantidad: slider 1–50, valor visible, accesible y táctil */}
+                  {/* Selector cantidad: mismo diseño que objectives (range + gradiente rosa) */}
                   <div
                     id="quantity-input"
                     className="space-y-4"
@@ -766,28 +765,36 @@ function MiembrosContent() {
                       Cantidad de aportes (1–{MAX_QUANTITY})
                     </label>
 
-                    {/* Valor actual siempre visible (grande, claro) */}
-                    <p
-                      className="text-3xl sm:text-4xl font-bold text-white tabular-nums"
-                      aria-live="polite"
-                      aria-atomic="true"
-                    >
-                      {quantity} {quantity === 1 ? "aporte" : "aportes"}
-                    </p>
-
-                    {/* Slider: track alto, thumb >= 28px, paso 1, snap enteros */}
-                    <Slider
-                      min={1}
-                      max={MAX_QUANTITY}
-                      step={1}
-                      value={[quantity]}
-                      onValueChange={(v) =>
-                        setQuantity(clampQuantity(v[0] ?? quantity))
-                      }
-                      disabled={paymentLoading}
-                      aria-label={`Cantidad de aportes, de 1 a ${MAX_QUANTITY}`}
-                      className="w-full py-3 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-track]]:rounded-full [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:bg-white/20 [&_[data-slot=slider-thumb]]:size-7 [&_[data-slot=slider-thumb]]:rounded-full [&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-white/30 [&_[data-slot=slider-thumb]]:bg-zinc-100 [&_[data-slot=slider-thumb]]:shadow-lg [&_[data-slot=slider-thumb]]:transition-transform [&_[data-slot=slider-thumb]]:duration-150 motion-reduce:[&_[data-slot=slider-thumb]]:transition-none focus-visible:[&_[data-slot=slider-thumb]]:ring-4 focus-visible:[&_[data-slot=slider-thumb]]:ring-white/30 focus-visible:[&_[data-slot=slider-thumb]]:outline-none data-[disabled]:opacity-50"
-                    />
+                    <div className="w-full">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-zinc-300 text-sm font-medium">
+                          {quantity} {quantity === 1 ? "aporte" : "aportes"}
+                        </span>
+                        <span className="text-zinc-500 text-xs font-normal">
+                          {(
+                            quantity *
+                            DISPLAY_CONTRIBUTION_USD *
+                            (1 + PLATFORM_FEE_PERCENT / 100)
+                          ).toFixed(2)}{" "}
+                          USD
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1}
+                        max={MAX_QUANTITY}
+                        value={quantity}
+                        onChange={(e) =>
+                          setQuantity(clampQuantity(parseInt(e.target.value, 10)))
+                        }
+                        disabled={paymentLoading}
+                        aria-label={`Cantidad de aportes, de 1 a ${MAX_QUANTITY}`}
+                        className="w-full h-4 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, rgba(202, 0, 145, 0.8) 0%, rgba(202, 0, 145, 0.8) ${((quantity - 1) / (MAX_QUANTITY - 1)) * 100}%, rgba(255, 255, 255, 0.2) ${((quantity - 1) / (MAX_QUANTITY - 1)) * 100}%, rgba(255, 255, 255, 0.2) 100%)`,
+                        }}
+                      />
+                    </div>
 
                     {/* Marcas mínimas: 1 y 50 en los extremos */}
                     <div className="flex justify-between text-sm text-zinc-500 px-0.5">

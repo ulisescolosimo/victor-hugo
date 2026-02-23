@@ -2,9 +2,9 @@ import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
 function getNextPath(next: string | null): string {
-  if (!next) return "/"
+  if (!next) return "/miembros"
   if (next.startsWith("/") && !next.startsWith("//")) return next
-  return "/"
+  return "/miembros"
 }
 
 export async function GET(request: Request) {
