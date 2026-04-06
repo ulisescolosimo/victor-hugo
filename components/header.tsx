@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Menu, HelpCircle, DollarSign, Info, ChevronRight, X, LogIn, UserPlus, Users, LogOut } from "lucide-react"
+import { Menu, HelpCircle, DollarSign, Info, ChevronRight, X, LogIn, UserPlus, Users, LogOut, BarChart3 } from "lucide-react"
 import {
   Sheet,
   SheetClose,
@@ -31,6 +31,8 @@ export function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const isMiembrosPage = pathname === "/miembros"
+  const isAdminPage = pathname.startsWith("/admin")
+  const [isAdmin, setIsAdmin] = useState(false)
 
   // Evitar hidratación con Radix: el Sheet solo se monta en cliente (IDs aria-controls difieren SSR vs cliente)
   useEffect(() => setSheetReady(true), [])
@@ -43,6 +45,17 @@ export function Header() {
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false)
+      return
+    }
+    fetch("/api/admin/session")
+      .then((res) => (res.ok ? res.json() : { admin: false }))
+      .then((data: { admin?: boolean }) => setIsAdmin(Boolean(data.admin)))
+      .catch(() => setIsAdmin(false))
+  }, [user])
 
   async function handleSignOut() {
     const client = createClient()
@@ -105,7 +118,7 @@ export function Header() {
 
           {/* Desktop Navigation Links */}
           <div className="hidden items-center gap-8 lg:flex relative z-[60]">
-            {!isMiembrosPage && (
+            {!isMiembrosPage && !isAdminPage && (
               <>
                 <a 
                   href="#sobre-proyecto" 
@@ -130,12 +143,21 @@ export function Header() {
                 </a>
               </>
             )}
-            {user && !isMiembrosPage && (
+            {user && !isMiembrosPage && !isAdminPage && (
               <Link
                 href="/miembros"
                 className="text-sm text-white transition-colors hover:text-pink-500"
               >
                 Miembros
+              </Link>
+            )}
+            {user && isAdmin && (
+              <Link
+                href="/admin/ventas"
+                className="text-sm text-white transition-colors hover:text-pink-500 inline-flex items-center gap-1.5"
+              >
+                <BarChart3 className="size-4 opacity-80" aria-hidden />
+                Ventas
               </Link>
             )}
             {user ? (
@@ -159,6 +181,14 @@ export function Header() {
                     <p className="text-xs text-white/60 truncate">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator className="bg-white/10" />
+                  {isAdmin ? (
+                    <DropdownMenuItem asChild className="focus:bg-pink-500/20 cursor-pointer">
+                      <Link href="/admin/ventas" className="flex items-center gap-2">
+                        <BarChart3 className="size-4" />
+                        Panel de ventas
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
                   <DropdownMenuItem
                     onClick={handleSignOut}
                     className="text-pink-300 focus:bg-pink-500/20 focus:text-pink-200 cursor-pointer"
@@ -243,7 +273,7 @@ export function Header() {
 
                   {/* Navegación mejorada */}
                   <nav className="flex flex-col px-4 py-6 gap-2 flex-1">
-                    {!isMiembrosPage && (
+                    {!isMiembrosPage && !isAdminPage && (
                       <>
                         <a
                           href="#sobre-proyecto"
@@ -300,7 +330,7 @@ export function Header() {
                             <p className="text-xs text-white/60 truncate">{user.email}</p>
                           </div>
                         </div>
-                        {!isMiembrosPage && (
+                        {!isMiembrosPage && !isAdminPage && (
                           <Link
                             href="/miembros"
                             onClick={() => setIsSheetOpen(false)}
@@ -315,6 +345,21 @@ export function Header() {
                             <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
                           </Link>
                         )}
+                        {isAdmin ? (
+                          <Link
+                            href="/admin/ventas"
+                            onClick={() => setIsSheetOpen(false)}
+                            className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
+                                <BarChart3 className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
+                              </div>
+                              <span className="font-medium">Panel de ventas</span>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
+                          </Link>
+                        ) : null}
                         <button
                           type="button"
                           onClick={() => { handleSignOut() }}
