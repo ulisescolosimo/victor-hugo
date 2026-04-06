@@ -39,6 +39,18 @@ const PLATFORM_FEE_PERCENT = 12
 /** Máximo de aportes por pago. */
 const MAX_QUANTITY = 50
 
+function trackPurchaseBeforeRedirect(quantity: number) {
+  if (typeof window === "undefined") return
+
+  const fbq = (window as Window & { fbq?: (...args: unknown[]) => void }).fbq
+  if (typeof fbq !== "function") return
+
+  fbq("track", "Purchase", {
+    value: Number((quantity * DISPLAY_CONTRIBUTION_USD).toFixed(2)),
+    currency: "USD",
+  })
+}
+
 type PaymentStatus =
   | "pending"
   | "approved"
@@ -602,6 +614,7 @@ function MiembrosContent() {
         return
       }
       if (data.paymentUrl) {
+        trackPurchaseBeforeRedirect(quantity)
         window.location.href = data.paymentUrl
         return
       }
@@ -636,6 +649,7 @@ function MiembrosContent() {
         return
       }
       if (data.paymentUrl) {
+        trackPurchaseBeforeRedirect(quantity)
         window.location.href = data.paymentUrl
         return
       }
