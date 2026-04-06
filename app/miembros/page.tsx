@@ -234,7 +234,9 @@ function CountdownBlock({ target }: { target: Date }) {
           <span
             className={`text-2xl sm:text-3xl font-bold text-white tabular-nums ${w} inline-block text-center`}
           >
-            {String(n).padStart(label === "días" ? 3 : 2, "0")}
+            {label === "días"
+              ? String(n)
+              : String(n).padStart(2, "0")}
           </span>
           <span className="mt-1 text-xs text-zinc-400 uppercase tracking-wider">
             {label}

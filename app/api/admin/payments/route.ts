@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { isAdminEmail } from "@/lib/is-admin"
+import { isUserAdmin } from "@/lib/admin-role"
 
 type PaymentAgg = {
   status: string
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user?.email || !isAdminEmail(user.email)) {
+  if (!user?.id || !(await isUserAdmin(user.id))) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 })
   }
 

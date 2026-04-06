@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { createClient } from "@/lib/supabase/client"
+import { cn } from "@/lib/utils"
 import type { User } from "@supabase/supabase-js"
 
 export function Header() {
@@ -51,7 +52,7 @@ export function Header() {
       setIsAdmin(false)
       return
     }
-    fetch("/api/admin/session")
+    fetch("/api/admin/session", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : { admin: false }))
       .then((data: { admin?: boolean }) => setIsAdmin(Boolean(data.admin)))
       .catch(() => setIsAdmin(false))
@@ -152,13 +153,29 @@ export function Header() {
               </Link>
             )}
             {user && isAdmin && (
-              <Link
-                href="/admin/ventas"
-                className="text-sm text-white transition-colors hover:text-pink-500 inline-flex items-center gap-1.5"
-              >
-                <BarChart3 className="size-4 opacity-80" aria-hidden />
-                Ventas
-              </Link>
+              <>
+                {!isMiembrosPage && !isAdminPage && (
+                  <span
+                    className="hidden lg:inline-block h-4 w-px shrink-0 bg-white/20"
+                    aria-hidden
+                  />
+                )}
+                <Link
+                  href="/admin/ventas"
+                  className={cn(
+                    "text-sm inline-flex items-center gap-1.5 transition-colors",
+                    pathname.startsWith("/admin")
+                      ? "text-pink-400 font-medium"
+                      : "text-white hover:text-pink-500"
+                  )}
+                  aria-current={
+                    pathname.startsWith("/admin") ? "page" : undefined
+                  }
+                >
+                  <BarChart3 className="size-4 opacity-90 shrink-0" aria-hidden />
+                  Administración
+                </Link>
+              </>
             )}
             {user ? (
               <DropdownMenu>
@@ -183,9 +200,15 @@ export function Header() {
                   <DropdownMenuSeparator className="bg-white/10" />
                   {isAdmin ? (
                     <DropdownMenuItem asChild className="focus:bg-pink-500/20 cursor-pointer">
-                      <Link href="/admin/ventas" className="flex items-center gap-2">
-                        <BarChart3 className="size-4" />
-                        Panel de ventas
+                      <Link
+                        href="/admin/ventas"
+                        className="flex items-center gap-2"
+                        aria-current={
+                          pathname.startsWith("/admin") ? "page" : undefined
+                        }
+                      >
+                        <BarChart3 className="size-4 shrink-0" />
+                        Administración
                       </Link>
                     </DropdownMenuItem>
                   ) : null}
@@ -349,13 +372,21 @@ export function Header() {
                           <Link
                             href="/admin/ventas"
                             onClick={() => setIsSheetOpen(false)}
-                            className="group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium text-white/90 transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:text-white active:scale-[0.98] active:bg-pink-500/30 cursor-pointer border border-transparent hover:border-white/10 touch-manipulation"
+                            className={cn(
+                              "group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium transition-all duration-200 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 active:scale-[0.98] cursor-pointer border touch-manipulation",
+                              pathname.startsWith("/admin")
+                                ? "text-pink-300 border-pink-500/30 bg-pink-500/10"
+                                : "text-white/90 hover:text-white border-transparent hover:border-white/10 hover:bg-pink-500/20"
+                            )}
+                            aria-current={
+                              pathname.startsWith("/admin") ? "page" : undefined
+                            }
                           >
                             <div className="flex items-center gap-4">
                               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 group-hover:bg-pink-500/20 transition-colors">
                                 <BarChart3 className="h-5 w-5 text-white/70 group-hover:text-pink-400 transition-colors" />
                               </div>
-                              <span className="font-medium">Panel de ventas</span>
+                              <span className="font-medium">Administración</span>
                             </div>
                             <ChevronRight className="h-5 w-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
                           </Link>

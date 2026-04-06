@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { isAdminEmail } from "@/lib/is-admin"
+import { isUserAdmin } from "@/lib/admin-role"
 
 export const metadata: Metadata = {
   title: "Administración",
@@ -18,10 +18,10 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user?.email) {
+  if (!user) {
     redirect("/login?redirect=" + encodeURIComponent("/admin/ventas"))
   }
-  if (!isAdminEmail(user.email)) {
+  if (!(await isUserAdmin(user.id))) {
     redirect("/")
   }
 
