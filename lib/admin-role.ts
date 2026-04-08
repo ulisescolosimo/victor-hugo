@@ -1,36 +1,42 @@
 import { createAdminClient } from "@/lib/supabase/admin"
-import { createClient } from "@/lib/supabase/server"
 
 /**
  * Admin si:
  * - `public.profiles.role = 'admin'`, o
- * - existe fila en `public.admin_users` para el usuario.
+ * - existe fila en `public.admin_users` para el usuario (si la tabla sigue existiendo).
  *
  * Asignar (SQL Editor):
  *   update public.profiles set role = 'admin' where id = '<uuid>';
- *   insert into public.admin_users (user_id) values ('<uuid>');
  *
- * La consulta usa service_role solo tras comprobar que `userId` coincide con la sesión.
+ * Tras la migración que elimina `admin_users`, solo cuenta `profiles.role`.
+ *
+ * IMPORTANTE: `userId` debe ser el `id` del usuario obtenido con
+ * `createClient().auth.getUser()` en el mismo request (layout, route handler, etc.).
+ * No volver a leer la sesión aquí: una segunda `getUser()` puede fallar o diferir
+ * y devolver 403 en la API aunque el layout haya autorizado.
  */
 export async function isUserAdmin(
   userId: string | null | undefined
 ): Promise<boolean> {
   if (!userId) return false
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user?.id || user.id !== userId) return false
 
   try {
     const admin = createAdminClient()
 
-    const { data: profile } = await admin
+    const { data: profile, error: profileError } = await admin
       .from("profiles")
       .select("role")
       .eq("id", userId)
       .maybeSingle()
-    if (profile?.role === "admin") return true
+
+    if (profileError) {
+      console.error("isUserAdmin profiles:", profileError.message)
+    } else {
+      const role = String(profile?.role ?? "")
+        .trim()
+        .toLowerCase()
+      if (role === "admin") return true
+    }
 
     const { data: adminRow, error: adminUsersError } = await admin
       .from("admin_users")
