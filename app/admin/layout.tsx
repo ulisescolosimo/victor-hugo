@@ -1,29 +1,10 @@
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
-import { isUserAdmin } from "@/lib/admin-role"
 
 export const metadata: Metadata = {
-  title: "Administración",
+  title: "Administración de pagos",
   robots: { index: false, follow: false },
 }
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login?redirect=" + encodeURIComponent("/admin/ventas"))
-  }
-  if (!(await isUserAdmin(user.id))) {
-    redirect("/")
-  }
-
-  return <>{children}</>
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return <main className="min-h-screen bg-zinc-950 text-white">{children}</main>
 }
