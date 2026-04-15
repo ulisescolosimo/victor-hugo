@@ -33,14 +33,17 @@ export async function POST(request: NextRequest) {
 
     const { data: payment, error: paymentError } = await admin
       .from("payments")
-      .select("id, status, user_id, user_email, checkout_token")
+      .select("id, status, user_id, user_email, metadata")
       .eq("id", paymentId)
       .single()
 
     if (paymentError || !payment) {
       return NextResponse.json({ error: "No encontramos el pago." }, { status: 404 })
     }
-    if (payment.checkout_token !== checkoutToken) {
+    const metadata = payment.metadata as { checkout_token?: string } | null
+    const paymentCheckoutToken =
+      typeof metadata?.checkout_token === "string" ? metadata.checkout_token : ""
+    if (paymentCheckoutToken !== checkoutToken) {
       return NextResponse.json({ error: "Token de checkout inválido." }, { status: 403 })
     }
     if (normalizeEmail(payment.user_email) !== email) {
@@ -91,7 +94,6 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", paymentId)
-      .eq("checkout_token", checkoutToken)
 
     if (linkError) {
       return NextResponse.json({ error: "No pudimos asociar el pago a tu cuenta." }, { status: 500 })

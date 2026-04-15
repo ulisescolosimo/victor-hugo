@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
 import Script from "next/script"
+import { Suspense } from "react"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
 import { JsonLd } from "@/components/seo/json-ld"
@@ -97,7 +98,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${montserrat.variable} font-sans antialiased`}>
-        <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
+        <Suspense fallback={null}>
+          <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
+        </Suspense>
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)

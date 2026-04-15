@@ -74,7 +74,10 @@ export async function POST(request: NextRequest) {
         title,
         status: "pending",
         external_reference: crypto.randomUUID(),
-        checkout_token: checkoutToken,
+        metadata: {
+          checkout_token: checkoutToken,
+          checkout_flow: "guest_or_fast_checkout",
+        },
         payment_provider: provider,
       })
       .select("id, external_reference")

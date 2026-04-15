@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Buscar pago por preference_id (order ID de PayPal) o por paymentId
     let query = admin
       .from("payments")
-      .select("id, user_id, status, payment_provider, checkout_token")
+      .select("id, user_id, status, payment_provider, metadata")
       .eq("payment_provider", "paypal")
 
     if (paymentIdParam) {
@@ -50,8 +50,11 @@ export async function POST(request: NextRequest) {
     }
 
     const authorizedByUser = Boolean(user?.id && payment.user_id === user.id)
+    const metadata = payment.metadata as { checkout_token?: string } | null
+    const paymentCheckoutToken =
+      typeof metadata?.checkout_token === "string" ? metadata.checkout_token : ""
     const authorizedByToken =
-      Boolean(checkoutToken) && payment.checkout_token === checkoutToken
+      Boolean(checkoutToken) && paymentCheckoutToken === checkoutToken
 
     if (!authorizedByUser && !authorizedByToken) {
       return NextResponse.json({ error: "No autorizado para capturar este pago" }, { status: 403 })
