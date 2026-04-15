@@ -6,20 +6,18 @@ import { notifyPayPalApproved } from "@/lib/notify-paypal-approved"
 
 /**
  * Captura una orden de PayPal tras el retorno del usuario.
- * Body: { orderId: string (token de PayPal), paymentId?: string (id interno) }
- * Requiere usuario autenticado; el pago debe pertenecer a ese usuario.
+ * Body: { orderId: string (token de PayPal), paymentId?: string (id interno), checkoutToken?: string }
+ * Permite captura autenticada o por checkoutToken para flujo de invitado.
  */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-    }
+    const { data: { user } } = await supabase.auth.getUser()
 
     const body = await request.json().catch(() => ({}))
     const orderId = (body?.orderId ?? body?.token) as string | undefined
     const paymentIdParam = body?.paymentId as string | undefined
+    const checkoutToken = (body?.checkoutToken ?? "").toString().trim()
 
     if (!orderId?.trim()) {
       return NextResponse.json(
@@ -33,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Buscar pago por preference_id (order ID de PayPal) o por paymentId
     let query = admin
       .from("payments")
-      .select("id, user_id, status, payment_provider")
+      .select("id, user_id, status, payment_provider, checkout_token")
       .eq("payment_provider", "paypal")
 
     if (paymentIdParam) {
@@ -51,8 +49,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (payment.user_id !== user.id) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 })
+    const authorizedByUser = Boolean(user?.id && payment.user_id === user.id)
+    const authorizedByToken =
+      Boolean(checkoutToken) && payment.checkout_token === checkoutToken
+
+    if (!authorizedByUser && !authorizedByToken) {
+      return NextResponse.json({ error: "No autorizado para capturar este pago" }, { status: 403 })
     }
 
     // Si ya está completado/aprobado, devolver éxito sin volver a capturar

@@ -1,8 +1,16 @@
 "use client"
 
-import React, { useState, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import React, { useState, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Accordion,
   AccordionContent,
@@ -17,6 +25,8 @@ import {
 } from "@/components/ui/carousel"
 import { motion } from "framer-motion"
 import { createClient } from "@/lib/supabase/client"
+import { trackGaEvent } from "@/lib/analytics"
+import { SiMercadopago, SiPaypal } from "@icons-pack/react-simple-icons"
 
 type TeamMember = { firstName: string; lastName: string; image: string; bio: string }
 
@@ -198,41 +208,86 @@ const DEFAULT_PHASES: FundingPhase[] = [
   },
 ]
 
-const MEMBROS_PATH = "/miembros"
-
-function getMembrosUrl(quantity: number) {
-  const q = Math.min(50, Math.max(1, quantity))
-  return `${MEMBROS_PATH}?quantity=${q}`
-}
-
 export default function ObjectivesParticipationSection() {
-  const router = useRouter()
   const [quantity, setQuantity] = useState(10)
   const [selectedOption, setSelectedOption] = useState<"single" | "five" | "custom">("five")
   const [phases, setPhases] = useState<FundingPhase[]>(DEFAULT_PHASES)
   const [authChecking, setAuthChecking] = useState(false)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [checkoutEmail, setCheckoutEmail] = useState("")
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [checkoutProviderLoading, setCheckoutProviderLoading] = useState<"mercadopago" | "paypal" | null>(null)
   /** Solo para mostrar en UI. Backend usa 0.1 USD en pruebas. */
   const contributionAmount = 18
   const selectedQuantity =
     selectedOption === "single" ? 1 : selectedOption === "five" ? 5 : quantity
   const totalAmount = selectedQuantity * contributionAmount
   const sliderValue = selectedQuantity === 1 ? 0 : selectedQuantity
+  const lastTrackedSliderValue = useRef<number>(sliderValue)
 
-  const goToPay = useCallback(async (q: number) => {
+  const openCheckoutModal = useCallback(async () => {
+    setCheckoutError(null)
+    trackGaEvent("vhm_pay_cta_click", {
+      selected_quantity: selectedQuantity,
+      selected_amount_usd: totalAmount,
+    })
     setAuthChecking(true)
     try {
       const client = createClient()
       const { data: { user } } = await client.auth.getUser()
-      const targetUrl = getMembrosUrl(q)
-      if (!user) {
-        router.push("/registro?redirect=" + encodeURIComponent(targetUrl))
-        return
+      if (user?.email) {
+        setCheckoutEmail(user.email)
       }
-      router.push(targetUrl)
+      setCheckoutOpen(true)
     } finally {
       setAuthChecking(false)
     }
-  }, [router])
+  }, [selectedQuantity, totalAmount])
+
+  const startCheckout = useCallback(async (provider: "mercadopago" | "paypal") => {
+    const email = checkoutEmail.trim().toLowerCase()
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    if (!isValidEmail) {
+      setCheckoutError("Ingresá un email válido para continuar.")
+      return
+    }
+
+    setCheckoutError(null)
+    trackGaEvent("vhm_pay_click", {
+      provider,
+      selected_quantity: selectedQuantity,
+      selected_amount_usd: totalAmount,
+    })
+    trackGaEvent("vhm_email_submitted", {
+      provider,
+      selected_quantity: selectedQuantity,
+      selected_amount_usd: totalAmount,
+    })
+    setCheckoutProviderLoading(provider)
+    try {
+      const response = await fetch("/api/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quantity: selectedQuantity,
+          provider,
+          email,
+        }),
+      })
+      const data = await response.json()
+
+      if (!response.ok || !data?.paymentUrl) {
+        setCheckoutError(data?.error ?? "No pudimos iniciar el pago. Probá nuevamente.")
+        return
+      }
+
+      window.location.href = data.paymentUrl
+    } catch {
+      setCheckoutError("Error de conexión. Intentá nuevamente.")
+    } finally {
+      setCheckoutProviderLoading(null)
+    }
+  }, [checkoutEmail, selectedQuantity, totalAmount])
 
   // Fases hardcodeadas; conexión a BD comentada.
   // useEffect(() => {
@@ -441,6 +496,14 @@ export default function ObjectivesParticipationSection() {
 
   const handleSliderChange = (value: number) => {
     const boundedValue = Math.max(0, Math.min(50, value))
+    const nextSelectedQuantity = boundedValue === 0 ? 1 : boundedValue
+    if (lastTrackedSliderValue.current !== boundedValue) {
+      trackGaEvent("vhm_selector_moved", {
+        selected_quantity: nextSelectedQuantity,
+        selected_amount_usd: nextSelectedQuantity * contributionAmount,
+      })
+      lastTrackedSliderValue.current = boundedValue
+    }
     if (boundedValue === 0) {
       setSelectedOption("single")
       return
@@ -662,9 +725,6 @@ export default function ObjectivesParticipationSection() {
                   <span className="text-white text-xs sm:text-sm font-semibold">
                     Seleccionado: {selectedQuantity} {selectedQuantity === 1 ? "aporte" : "aportes"} ({totalAmount} USD)
                   </span>
-                </div>
-                <div className="flex items-center justify-between mb-2">
-                  <span />
                   <span className="text-white/70 text-xs sm:text-sm">50 aportes</span>
                 </div>
                 <input
@@ -684,7 +744,7 @@ export default function ObjectivesParticipationSection() {
                 <Button 
                   type="button"
                   disabled={authChecking}
-                  onClick={() => goToPay(selectedQuantity)}
+                  onClick={openCheckoutModal}
                   className="w-full font-black text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-11 sm:h-12 md:h-14 hover:brightness-110 transition-all duration-200 active:scale-[0.99]"
                   style={{
                     background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
@@ -693,12 +753,77 @@ export default function ObjectivesParticipationSection() {
                   {authChecking ? "…" : `QUIERO APORTAR ${totalAmount} USD`}
                 </Button>
                 <p className="text-white/65 text-xs sm:text-sm text-center w-full">
-                  Vas a ser redireccionado a Mercado Pago para completar el aporte.
+                  Vas a ser redireccionado a Mercado Pago o PayPal para completar el aporte.
                 </p>
               </div>
               </div>
             </motion.div>
           </motion.div>
+
+          <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+            <DialogContent className="sm:max-w-md bg-[#101010] border-white/15 text-white">
+              <DialogHeader>
+                <DialogTitle>Finalizar aporte</DialogTitle>
+                <DialogDescription className="text-white/70">
+                  Ingresá tu email y tocá uno de los botones para continuar al pago.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="checkout-email" className="text-white/90">
+                    Email
+                  </Label>
+                  <Input
+                    id="checkout-email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="tu@email.com"
+                    value={checkoutEmail}
+                    onChange={(e) => setCheckoutEmail(e.target.value)}
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/45"
+                  />
+                </div>
+                {checkoutError && (
+                  <p className="text-sm text-red-300">{checkoutError}</p>
+                )}
+                <div className="grid grid-cols-1 gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => startCheckout("mercadopago")}
+                    disabled={checkoutProviderLoading !== null}
+                    className="w-full bg-[#009ee3] hover:bg-[#008ccc] text-white font-semibold justify-center gap-2 h-11"
+                  >
+                    {checkoutProviderLoading === "mercadopago" ? (
+                      "Redirigiendo..."
+                    ) : (
+                      <>
+                        <SiMercadopago className="size-4 shrink-0" aria-hidden />
+                        Pagar con Mercado Pago
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => startCheckout("paypal")}
+                    disabled={checkoutProviderLoading !== null}
+                    className="w-full bg-[#0070ba] hover:bg-[#005d99] text-white font-semibold justify-center gap-2 h-11"
+                  >
+                    {checkoutProviderLoading === "paypal" ? (
+                      "Redirigiendo..."
+                    ) : (
+                      <>
+                        <SiPaypal className="size-4 shrink-0" aria-hidden />
+                        Pagar con PayPal
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-white/55">
+                  Te vamos a redireccionar a la plataforma de pago elegida.
+                </p>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Metas y Fases en dos columnas */}
           <motion.div

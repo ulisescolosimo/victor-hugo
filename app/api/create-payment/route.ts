@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { getUsdToArsRate } from "@/lib/get-usd-ars-rate"
 import { MercadoPagoConfig, Preference } from "mercadopago"
 import { createOrder } from "@/lib/paypal"
@@ -19,32 +20,50 @@ function getSiteUrl(request: NextRequest): string {
   return `${proto}://${host}`
 }
 
+function normalizeEmail(value: unknown): string {
+  return typeof value === "string" ? value.trim().toLowerCase() : ""
+}
+
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-    }
-
+    const admin = createAdminClient()
     const body = await request.json()
     const quantity = Math.min(MAX_QUANTITY, Math.max(MIN_QUANTITY, Number(body?.quantity) || 1))
     const provider = body?.provider === "paypal" ? "paypal" : "mercadopago"
+    const checkoutEmail = normalizeEmail(body?.email)
+    const checkoutName = typeof body?.name === "string" ? body.name.trim() : ""
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const userEmail = normalizeEmail(user?.email ?? "")
+    const effectiveEmail = userEmail || checkoutEmail
+
+    if (!effectiveEmail || !isValidEmail(effectiveEmail)) {
+      return NextResponse.json({ error: "Ingresá un email válido para continuar." }, { status: 400 })
+    }
 
     const amountUsdBeforeFee = quantity * UNIT_PRICE_USD
     const amountUsd = amountUsdBeforeFee * (1 + PLATFORM_FEE_PERCENT / 100)
     const { rate: usdToArsRate } = await getUsdToArsRate()
     const amountArs = Math.round(amountUsd * usdToArsRate)
 
-    const userName = user.user_metadata?.full_name ?? user.user_metadata?.nombre ?? user.email ?? ""
-    const userEmail = user.email ?? ""
+    const userName =
+      checkoutName ||
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.nombre ||
+      effectiveEmail
+    const checkoutToken = crypto.randomUUID()
 
     const title = quantity === 1 ? "1 Aporte - Proyecto VHM" : `${quantity} Aportes - Proyecto VHM`
-    const { data: payment, error: insertError } = await supabase
+    const { data: payment, error: insertError } = await admin
       .from("payments")
       .insert({
-        user_id: user.id,
-        user_email: userEmail,
+        user_id: user?.id ?? null,
+        user_email: effectiveEmail,
         user_name: userName,
         amount_usd: amountUsd,
         amount_ars: amountArs,
@@ -55,6 +74,7 @@ export async function POST(request: NextRequest) {
         title,
         status: "pending",
         external_reference: crypto.randomUUID(),
+        checkout_token: checkoutToken,
         payment_provider: provider,
       })
       .select("id, external_reference")
@@ -66,6 +86,8 @@ export async function POST(request: NextRequest) {
     }
 
     const siteUrl = getSiteUrl(request)
+    const checkoutParams = `payment_id=${payment.id}&checkout=${checkoutToken}&email=${encodeURIComponent(effectiveEmail)}`
+    const thankYouBase = `${siteUrl}/gracias?${checkoutParams}`
 
     if (provider === "paypal") {
       try {
@@ -78,12 +100,12 @@ export async function POST(request: NextRequest) {
           paymentId: payment.id,
           amountUsd,
           description: `${description} - ${quantity} x ${unitWithFee.toFixed(2)} USD (incl. ${PLATFORM_FEE_PERCENT}% plataforma)`,
-          returnUrl: `${siteUrl}/miembros?payment=success&payment_id=${payment.id}`,
-          cancelUrl: `${siteUrl}/miembros?payment=cancelled&payment_id=${payment.id}`,
+          returnUrl: `${thankYouBase}&payment=success`,
+          cancelUrl: `${thankYouBase}&payment=cancelled`,
           brandName: "Proyecto VHM",
           requestId: payment.id,
         })
-        await supabase
+        await admin
           .from("payments")
           .update({
             preference_id: orderId,
@@ -95,6 +117,7 @@ export async function POST(request: NextRequest) {
           paymentUrl: approveUrl,
           paymentId: payment.id,
           preferenceId: orderId,
+          checkoutToken,
         })
       } catch (err) {
         console.error("PayPal create order error:", err)
@@ -112,9 +135,9 @@ export async function POST(request: NextRequest) {
     }
 
     const backUrls = {
-      success: `${siteUrl}/miembros?payment=success&payment_id=${payment.id}`,
-      failure: `${siteUrl}/miembros?payment=failure&payment_id=${payment.id}`,
-      pending: `${siteUrl}/miembros?payment=pending&payment_id=${payment.id}`,
+      success: `${thankYouBase}&payment=success`,
+      failure: `${thankYouBase}&payment=failure`,
+      pending: `${thankYouBase}&payment=pending`,
     }
 
     const config = new MercadoPagoConfig({ accessToken })
@@ -132,7 +155,7 @@ export async function POST(request: NextRequest) {
           },
         ],
         payer: {
-          email: userEmail,
+          email: effectiveEmail,
           name: userName,
         },
         back_urls: backUrls,
@@ -142,7 +165,7 @@ export async function POST(request: NextRequest) {
         statement_descriptor: "VHM APORTE",
         metadata: {
           type: "vhm_aporte",
-          user_id: user.id,
+          user_id: user?.id ?? null,
           quantity,
           amount_usd: amountUsd,
           amount_ars: amountArs,
@@ -154,7 +177,7 @@ export async function POST(request: NextRequest) {
     const preferenceId = preference.id
 
     if (paymentUrl) {
-      await supabase
+      await admin
         .from("payments")
         .update({
           payment_url: paymentUrl,
@@ -168,6 +191,7 @@ export async function POST(request: NextRequest) {
       paymentUrl: paymentUrl ?? null,
       paymentId: payment.id,
       preferenceId: preferenceId ?? null,
+      checkoutToken,
     })
   } catch (err) {
     console.error("create-payment error:", err)
