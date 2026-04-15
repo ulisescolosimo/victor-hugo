@@ -208,11 +208,15 @@ function getMembrosUrl(quantity: number) {
 export default function ObjectivesParticipationSection() {
   const router = useRouter()
   const [quantity, setQuantity] = useState(10)
+  const [selectedOption, setSelectedOption] = useState<"single" | "five" | "custom">("five")
   const [phases, setPhases] = useState<FundingPhase[]>(DEFAULT_PHASES)
   const [authChecking, setAuthChecking] = useState(false)
   /** Solo para mostrar en UI. Backend usa 0.1 USD en pruebas. */
   const contributionAmount = 18
-  const totalAmount = quantity * contributionAmount
+  const selectedQuantity =
+    selectedOption === "single" ? 1 : selectedOption === "five" ? 5 : quantity
+  const totalAmount = selectedQuantity * contributionAmount
+  const sliderValue = selectedQuantity === 1 ? 0 : selectedQuantity
 
   const goToPay = useCallback(async (q: number) => {
     setAuthChecking(true)
@@ -435,9 +439,18 @@ export default function ObjectivesParticipationSection() {
     },
   ]
 
-  const handleQuantityChange = (value: number) => {
-    const newQuantity = Math.max(1, Math.min(50, value))
-    setQuantity(newQuantity)
+  const handleSliderChange = (value: number) => {
+    const boundedValue = Math.max(0, Math.min(50, value))
+    if (boundedValue === 0) {
+      setSelectedOption("single")
+      return
+    }
+    if (boundedValue === 5) {
+      setSelectedOption("five")
+      return
+    }
+    setSelectedOption("custom")
+    setQuantity(boundedValue)
   }
 
   return (
@@ -554,109 +567,135 @@ export default function ObjectivesParticipationSection() {
             Así participás de un <span className="font-bold text-white">proyecto colectivo</span> para hacer posible la transmisión del <span className="font-bold text-white">Mundial 2026</span>.
           </motion.p>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 mb-16 sm:mb-20 md:mb-24"
+            className="flex flex-col gap-5 sm:gap-6 md:gap-7 mb-16 sm:mb-20 md:mb-24"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
             variants={staggerContainerVariants}
           >
-            {/* Aporte único */}
+            {/* Opción principal: planes múltiples */}
             <motion.div
-              className="p-5 sm:p-6 md:p-8 text-center flex flex-col relative overflow-hidden rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)]"
+              className="p-5 sm:p-6 md:p-8 text-center flex flex-col relative overflow-hidden rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-[#0f2012]/55 border border-white/20 shadow-[0px_24px_36px_0px_rgba(0,0,0,0.35)]"
               variants={staggerItemVariants}
             >
-              {/* Highlight vertical en el lado derecho */}
+              {/* Overlay sutil para profundidad */}
               <div 
-                className="absolute right-0 top-0 bottom-0 w-1/4 pointer-events-none rounded-r-[16px] sm:rounded-r-[20px] md:rounded-r-[24px] bg-gradient-to-l from-white/10 via-white/5 to-transparent"
+                className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_70%)]"
               />
               <div className="relative z-10 flex flex-col h-full min-h-[120px] sm:min-h-[140px] md:min-h-[150px]">
-              <p 
-                className="text-white mb-3 sm:mb-4 text-[24px] sm:text-[30px] md:text-[36px] leading-[105%] tracking-normal font-light"
-                style={{
-                  fontFamily: 'Montserrat, sans-serif',
-                }}
-              >
-                Aporte único
-              </p>
-              <p 
-                className="text-white mb-6 sm:mb-8 md:mb-10 text-[24px] sm:text-[30px] md:text-[36px] leading-[105%] tracking-normal font-bold"
-                style={{
-                  fontFamily: 'Montserrat, sans-serif',
-                }}
-              >
-                18 USD
-              </p>
+              <div className="w-full mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+                  <button
+                    type="button"
+                    disabled={authChecking}
+                    onClick={() => setSelectedOption("single")}
+                    className={`rounded-[16px] p-4 text-left transition-all duration-200 border relative cursor-pointer ${
+                      selectedOption === "single"
+                        ? "bg-[linear-gradient(180deg,rgba(202,0,145,0.26),rgba(80,0,98,0.35))] text-white border-[#d946ef]/70 shadow-[0_12px_26px_rgba(202,0,145,0.3)]"
+                        : "bg-white/8 text-white hover:bg-white/14 border-white/25"
+                    }`}
+                  >
+                    <p className={`text-xs uppercase tracking-[0.08em] mb-1 ${selectedOption === "single" ? "text-white/80" : "text-white/60"}`}>Aporte base</p>
+                    <p className="text-[28px] sm:text-[32px] font-black leading-none">18</p>
+                    <p className="text-sm sm:text-base font-semibold mt-1">USD / 1 aporte</p>
+                    <p className={`mt-3 text-xs sm:text-sm ${selectedOption === "single" ? "text-white/85" : "text-white/70"}`}>
+                      Forma simple para sumarte hoy.
+                    </p>
+                    {selectedOption === "single" && (
+                      <span className="mt-3 inline-flex text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white uppercase tracking-[0.08em]">
+                        Seleccionado
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={authChecking}
+                    onClick={() => setSelectedOption("five")}
+                    className={`rounded-[16px] p-4 text-left transition-all duration-200 relative border cursor-pointer ${
+                      selectedOption === "five"
+                        ? "bg-[linear-gradient(180deg,rgba(202,0,145,0.38),rgba(80,0,98,0.55))] text-white border-[#f0abfc]/75 shadow-[0_20px_40px_rgba(202,0,145,0.42)] scale-[1.03]"
+                        : "bg-white/8 text-white hover:bg-white/14 border-white/25 scale-[1.01]"
+                    }`}
+                  >
+                    <span className="absolute top-3 right-3 text-[10px] px-2 py-0.5 rounded-full bg-[#CA0091] text-white uppercase tracking-[0.08em]">
+                      Más elegido
+                    </span>
+                    <p className={`text-xs uppercase tracking-[0.08em] mb-1 ${selectedOption === "five" ? "text-white/90" : "text-white/60"}`}>Aporte recomendado</p>
+                    <p className="text-[30px] sm:text-[36px] font-black leading-none">90</p>
+                    <p className="text-sm sm:text-base font-semibold mt-1">USD / 5 aportes</p>
+                    <p className={`mt-3 text-xs sm:text-sm ${selectedOption === "five" ? "text-white/90" : "text-white/70"}`}>
+                      Más impacto para impulsar la meta.
+                    </p>
+                    {selectedOption === "five" && (
+                      <span className="mt-3 inline-flex text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white uppercase tracking-[0.08em]">
+                        Seleccionado
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={authChecking}
+                    onClick={() => setSelectedOption("custom")}
+                    className={`rounded-[16px] p-4 text-left transition-all duration-200 border relative cursor-pointer ${
+                      selectedOption === "custom"
+                        ? "bg-[linear-gradient(180deg,rgba(202,0,145,0.26),rgba(80,0,98,0.35))] text-white border-[#d946ef]/70 shadow-[0_12px_26px_rgba(202,0,145,0.3)]"
+                        : "bg-white/8 text-white hover:bg-white/14 border-white/25"
+                    }`}
+                  >
+                    <p className={`text-xs uppercase tracking-[0.08em] mb-1 ${selectedOption === "custom" ? "text-white/80" : "text-white/60"}`}>Aporte personalizado</p>
+                    <p className="text-[28px] sm:text-[32px] font-black leading-none">{quantity}</p>
+                    <p className="text-sm sm:text-base font-semibold mt-1">{quantity === 1 ? "aporte" : "aportes"} / {quantity * contributionAmount} USD</p>
+                    <p className={`mt-3 text-xs sm:text-sm ${selectedOption === "custom" ? "text-white/85" : "text-white/70"}`}>
+                      Definís tu nivel de participación.
+                    </p>
+                    {selectedOption === "custom" && (
+                      <span className="mt-3 inline-flex text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white uppercase tracking-[0.08em]">
+                        Seleccionado
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white text-xs sm:text-sm font-semibold">
+                    Seleccionado: {selectedQuantity} {selectedQuantity === 1 ? "aporte" : "aportes"} ({totalAmount} USD)
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span />
+                  <span className="text-white/70 text-xs sm:text-sm">50 aportes</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={50}
+                  step={5}
+                  value={sliderValue}
+                  onChange={(e) => handleSliderChange(parseInt(e.target.value))}
+                  className="w-full h-4 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                  style={{
+                    background: `linear-gradient(to right, rgba(202, 0, 145, 0.9) 0%, rgba(80, 0, 98, 0.9) ${(sliderValue / 50) * 100}%, rgba(255, 255, 255, 0.2) ${(sliderValue / 50) * 100}%, rgba(255, 255, 255, 0.2) 100%)`,
+                  }}
+                />
+              </div>
               <div className="mt-auto flex flex-col items-end gap-4">
                 <Button 
                   type="button"
                   disabled={authChecking}
-                  onClick={() => goToPay(1)}
-                  className="w-full font-semibold text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-10 sm:h-11 md:h-12"
+                  onClick={() => goToPay(selectedQuantity)}
+                  className="w-full font-black text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-11 sm:h-12 md:h-14 hover:brightness-110 transition-all duration-200 active:scale-[0.99]"
                   style={{
                     background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
                   }}
                 >
-                  {authChecking ? "…" : "QUIERO SER PARTE"}
-                </Button>
-                <p className="text-white/60 text-xs sm:text-sm text-center w-full">
-                  Una forma simple de ser parte.
-                </p>
-              </div>
-              </div>
-            </motion.div>
-
-            {/* Hasta 10 aportes */}
-            <motion.div
-              className="p-5 sm:p-6 md:p-8 text-center flex flex-col relative overflow-hidden rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)]"
-              variants={staggerItemVariants}
-            >
-              {/* Highlight vertical en el lado derecho */}
-              <div 
-                className="absolute right-0 top-0 bottom-0 w-1/4 pointer-events-none rounded-r-[16px] sm:rounded-r-[20px] md:rounded-r-[24px] bg-gradient-to-l from-white/10 via-white/5 to-transparent"
-              />
-              <div className="relative z-10 flex flex-col h-full min-h-[120px] sm:min-h-[140px] md:min-h-[150px]">
-              <p 
-                className="text-white mb-5 sm:mb-6 md:mb-8 text-[20px] sm:text-[28px] md:text-[36px] leading-[105%] tracking-normal font-light"
-                style={{
-                  fontFamily: 'Montserrat, sans-serif',
-                }}
-              >
-                <span className="font-bold">Aportar más de una vez</span>
-              </p>
-              <div className="mt-auto flex flex-col gap-5 w-full">
-                <div className="w-full">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-white/80 text-sm font-medium">
-                      {quantity} {quantity === 1 ? 'aporte' : 'aportes'}
-                    </span>
-                    <span className="text-white/50 text-xs font-normal">
-                      {totalAmount} USD
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={1}
-                    max={50}
-                    value={quantity}
-                    onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
-                    className="w-full h-4 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-                    style={{
-                      background: `linear-gradient(to right, rgba(202, 0, 145, 0.8) 0%, rgba(202, 0, 145, 0.8) ${((quantity - 1) / 49) * 100}%, rgba(255, 255, 255, 0.2) ${((quantity - 1) / 49) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
-                    }}
-                  />
-                </div>
-                <Button 
-                  type="button"
-                  disabled={authChecking}
-                  onClick={() => goToPay(quantity)}
-                  className="font-bold hover:bg-gray-100 bg-white text-black text-sm md:text-base px-4 md:px-6 py-3 md:py-3 h-12 md:h-12 transition-all duration-200 active:scale-95 touch-manipulation w-full"
-                >
                   {authChecking ? "…" : `QUIERO APORTAR ${totalAmount} USD`}
                 </Button>
-              </div>
-                <p className="text-white/60 text-xs sm:text-sm text-center w-full mt-2">
-                  Podés aportar más de una vez si querés participar con mayor alcance.
+                <p className="text-white/65 text-xs sm:text-sm text-center w-full">
+                  Vas a ser redireccionado a Mercado Pago para completar el aporte.
                 </p>
+              </div>
               </div>
             </motion.div>
           </motion.div>
@@ -849,52 +888,22 @@ export default function ObjectivesParticipationSection() {
               CUÁNTOS NECESITAMOS SER
             </h2>
 
-            {/* OPCIÓN 1 — APORTE ÚNICO */}
-            <div
-              className="pb-6 sm:pb-8 border-b border-white/20 mb-6 sm:mb-8"
-              style={{ fontFamily: "Montserrat, sans-serif" }}
-            >
-              <h3
-                className="text-white mb-4 sm:mb-5 text-lg sm:text-xl font-black"
-                style={{ fontFamily: "Montserrat, sans-serif" }}
-              >
-                OPCIÓN 1 — APORTE ÚNICO
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4">
-                <div>
-                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Aporte:</p>
-                  <p className="text-white text-base sm:text-lg">18 USD por persona</p>
-                </div>
-                <div>
-                  <p className="text-white text-sm sm:text-base font-bold mb-1">Personas necesarias:</p>
-                  <p className="text-white text-xl sm:text-2xl font-bold">≈ 14.000 personas</p>
-                </div>
-                <div>
-                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Objetivo:</p>
-                  <p className="text-white text-base sm:text-lg">250.000 USD</p>
-                </div>
-              </div>
-              <p className="text-white/70 text-sm sm:text-base leading-relaxed">
-                Si cada persona participa una sola vez, necesitamos ser alrededor de catorce mil para llegar al primer objetivo.
-              </p>
-            </div>
-
-            {/* OPCIÓN 2 — APORTE MÚLTIPLE */}
+            {/* APORTE MÚLTIPLE */}
             <div style={{ fontFamily: "Montserrat, sans-serif" }}>
               <h3
                 className="text-white mb-4 sm:mb-5 text-lg sm:text-xl font-black"
                 style={{ fontFamily: "Montserrat, sans-serif" }}
               >
-                OPCIÓN 2 — APORTE MÚLTIPLE
+                APORTE MÚLTIPLE
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4">
                 <div>
                   <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Aporte de referencia:</p>
-                  <p className="text-white text-base sm:text-lg">10 aportes</p>
+                  <p className="text-white text-base sm:text-lg">3 aportes</p>
                 </div>
                 <div>
                   <p className="text-white text-sm sm:text-base font-bold mb-1">Personas necesarias:</p>
-                  <p className="text-white text-xl sm:text-2xl font-bold">≈ 1.400 personas</p>
+                  <p className="text-white text-xl sm:text-2xl font-bold">≈ 4.700 personas</p>
                 </div>
                 <div>
                   <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Objetivo:</p>
@@ -902,7 +911,7 @@ export default function ObjectivesParticipationSection() {
                 </div>
               </div>
               <p className="text-white/70 text-sm sm:text-base leading-relaxed">
-                Si algunas personas participan más de una vez, el número de personas necesarias baja. Con este escenario de referencia, alcanza con ser alrededor de mil cuatrocientas.
+                Si algunas personas participan más de una vez, el número de personas necesarias baja de forma concreta. Con este escenario de referencia, alcanza con ser alrededor de cuatro mil setecientas.
               </p>
             </div>
           </motion.div>
