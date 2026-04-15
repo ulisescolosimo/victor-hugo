@@ -17,10 +17,19 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://elultimomundial.com"
+const DEFAULT_SITE_URL = "https://elultimomundial.com"
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL).trim()
+
+function getMetadataBase(url: string): URL {
+  try {
+    return new URL(url)
+  } catch {
+    return new URL(DEFAULT_SITE_URL)
+  }
+}
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: getMetadataBase(siteUrl),
   title: {
     default: "El Último Mundial - Victor Hugo Morales | Transmisión Mundial 2026 por los oyentes",
     template: "%s | El Último Mundial",
