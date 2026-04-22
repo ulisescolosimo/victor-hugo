@@ -30,9 +30,9 @@ export default function Footer() {
           {/* Right Side — ícono de contacto */}
           <div className="flex flex-col items-start sm:items-end justify-end md:items-end w-full sm:w-auto">
             <a
-              href="mailto:info@elultimomundial.com"
+              href="mailto:elultimomundialok@gmail.com"
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors touch-manipulation active:scale-95"
-              aria-label="Contacto: info@elultimomundial.com"
+              aria-label="Contacto: elultimomundialok@gmail.com"
             >
               <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </a>

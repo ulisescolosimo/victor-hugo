@@ -897,8 +897,8 @@ export default function ObjectivesParticipationSection() {
             escribirnos a:
           </p>
           <p>
-            <a href="mailto:info@elultimomundial.com" className={linkClass}>
-              info@elultimomundial.com
+            <a href="mailto:elultimomundialok@gmail.com" className={linkClass}>
+              elultimomundialok@gmail.com
             </a>
           </p>
         </>
