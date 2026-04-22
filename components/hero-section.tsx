@@ -119,21 +119,20 @@ export function HeroSection() {
             {/* Left Content */}
             <div className="relative w-full">
               <motion.h1
-                className="mb-4 sm:mb-5 md:mb-6 text-white uppercase leading-[83%] tracking-normal text-[36px] sm:text-[48px] md:text-[64px] lg:text-[80px] xl:text-[100px]"
-                style={{
-                  fontFamily: '"BBH Sans Hegarty", "Arial", sans-serif',
-                  fontWeight: 400,
-                  fontStyle: "normal",
-                }}
+                className="mb-4 sm:mb-5 md:mb-6 block w-fit max-w-full"
                 initial="hidden"
                 animate="visible"
                 variants={titleVariants}
               >
-                El
-                <br />
-                Ultimo
-                <br />
-                Mundial
+                <Image
+                  src="/images/hero-text.png"
+                  alt="El Último Mundial"
+                  width={1435}
+                  height={575}
+                  className="h-auto w-[min(100%,300px)] sm:w-[min(100%,410px)] md:w-[min(100%,480px)] lg:w-[min(100%,460px)] xl:w-[min(100%,650px)]"
+                  priority
+                  sizes="(max-width: 640px) min(100vw - 2rem, 160px), (max-width: 768px) 210px, (max-width: 1024px) 280px, (max-width: 1280px) 360px, 450px"
+                />
               </motion.h1>
 
               {/* Subtitle */}
