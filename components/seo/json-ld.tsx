@@ -1,6 +1,6 @@
 /**
  * JSON-LD estructurado para SEO (WebSite + Organization).
- * Ayuda a los buscadores a entender el sitio y puede habilitar rich results.
+ * Ayuda a los buscadores a entender el sitio; Organization puede mostrar logo en resultados.
  */
 export function JsonLd() {
   const siteUrl =
@@ -14,11 +14,6 @@ export function JsonLd() {
       "Una transmisión hecha por los oyentes, relatada por Víctor Hugo Morales. El Mundial 2026 financiado por la comunidad.",
     url: siteUrl,
     inLanguage: "es-AR",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: { "@type": "Endpoint", url: `${siteUrl}/miembros` },
-      "query-input": "required name=quantity",
-    },
   }
 
   const organization = {
@@ -26,6 +21,7 @@ export function JsonLd() {
     "@type": "Organization",
     name: "El Último Mundial",
     url: siteUrl,
+    logo: `${siteUrl}/icon.svg`,
     description:
       "Proyecto de transmisión del Mundial 2026 relatado por Víctor Hugo Morales, financiado por los oyentes y la comunidad.",
     sameAs: [],

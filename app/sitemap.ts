@@ -3,14 +3,11 @@ import type { MetadataRoute } from "next"
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "https://elultimomundial.com"
 
-/** Rutas públicas que queremos indexar. */
+/** Rutas públicas indexables (coherente con metadata robots en cada layout). */
 const publicRoutes = [
   { path: "", changefreq: "weekly" as const, priority: 1 },
   { path: "/registro", changefreq: "monthly" as const, priority: 0.8 },
-  { path: "/login", changefreq: "monthly" as const, priority: 0.7 },
   { path: "/miembros", changefreq: "weekly" as const, priority: 0.9 },
-  { path: "/recuperar", changefreq: "monthly" as const, priority: 0.5 },
-  { path: "/restablecer", changefreq: "monthly" as const, priority: 0.5 },
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
