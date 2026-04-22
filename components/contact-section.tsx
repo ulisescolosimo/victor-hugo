@@ -126,7 +126,7 @@ export default function ContactSection() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeInUpVariants}
         >
-          Una transmisión hecha por los oyentes. <br></br> Relatada por Víctor Hugo Morales.
+          Llevemos a Víctor Hugo al Mundial 2026. <br></br> Financiado por los oyentes.
         </motion.h2>
 
         {/* Main Card */}

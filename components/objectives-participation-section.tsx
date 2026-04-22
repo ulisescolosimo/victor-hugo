@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/carousel"
 import { motion } from "framer-motion"
 import { createClient } from "@/lib/supabase/client"
+import { Progress } from "@/components/ui/progress"
 
 type TeamMember = { firstName: string; lastName: string; image: string; bio: string }
 
@@ -203,6 +204,304 @@ const MEMBROS_PATH = "/miembros"
 function getMembrosUrl(quantity: number) {
   const q = Math.min(50, Math.max(1, quantity))
   return `${MEMBROS_PATH}?quantity=${q}`
+}
+
+type PublicFundingStats = {
+  goalUsd: number
+  totalUsd: number
+  totalUnits: number
+  paymentCount: number
+  progressPercent: number
+  payments: { amountUsd: number; quantity: number; at: string }[]
+  paymentsPage: number
+  paymentsPageSize: number
+  configured: boolean
+}
+
+function formatUsdEs(value: number) {
+  return `${value.toLocaleString("es-AR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })} USD`
+}
+
+function formatFundingDate(iso: string) {
+  try {
+    return new Intl.DateTimeFormat("es-AR", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "America/Argentina/Buenos_Aires",
+    }).format(new Date(iso))
+  } catch {
+    return ""
+  }
+}
+
+const PAYMENTS_LIST_PAGE_SIZE = 5
+
+function FundingStatsPanel() {
+  const [stats, setStats] = React.useState<PublicFundingStats | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [listBusy, setListBusy] = React.useState(false)
+  const [loadError, setLoadError] = React.useState(false)
+  const [paymentsListPage, setPaymentsListPage] = React.useState(1)
+  const isFirstFundingFetch = React.useRef(true)
+
+  React.useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        if (isFirstFundingFetch.current) {
+          setLoading(true)
+        } else {
+          setListBusy(true)
+        }
+        const params = new URLSearchParams({
+          paymentsPage: String(paymentsListPage),
+          paymentsPageSize: String(PAYMENTS_LIST_PAGE_SIZE),
+        })
+        const res = await fetch(`/api/public/funding-stats?${params.toString()}`)
+        const json = (await res.json()) as PublicFundingStats & { error?: string }
+        if (!res.ok) throw new Error("bad")
+        if (!cancelled) {
+          setStats(json)
+          if (json.configured && json.paymentsPage !== paymentsListPage) {
+            setPaymentsListPage(json.paymentsPage)
+          }
+        }
+      } catch {
+        if (!cancelled) setLoadError(true)
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+          setListBusy(false)
+          isFirstFundingFetch.current = false
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [paymentsListPage])
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-2xl mx-auto space-y-5 animate-pulse px-1">
+        <div className="h-5 bg-white/10 rounded-md w-2/3 mx-auto" />
+        <div className="h-3 bg-white/10 rounded-full w-full" />
+        <div className="h-28 bg-white/5 rounded-xl" />
+      </div>
+    )
+  }
+
+  if (loadError || !stats) {
+    return (
+      <p
+        className="text-white/80 text-center text-sm sm:text-base max-w-lg mx-auto"
+        style={{ fontFamily: "Montserrat, sans-serif" }}
+      >
+        No pudimos cargar las estadísticas en este momento. Probá de nuevo más tarde.
+      </p>
+    )
+  }
+
+  if (!stats.configured) {
+    return (
+      <div className="text-center max-w-lg mx-auto space-y-3">
+        <p
+          className="text-white text-base sm:text-lg md:text-xl font-medium drop-shadow-sm"
+          style={{ fontFamily: "Montserrat, sans-serif" }}
+        >
+          Las estadísticas públicas no están disponibles por ahora.
+        </p>
+        <p
+          className="text-white/75 text-sm sm:text-base"
+          style={{ fontFamily: "Montserrat, sans-serif" }}
+        >
+          Cuando el servidor esté configurado, vas a ver acá el avance y los últimos aportes confirmados.
+        </p>
+      </div>
+    )
+  }
+
+  const barPercent =
+    stats.goalUsd > 0 ? Math.min(100, (stats.totalUsd / stats.goalUsd) * 100) : 0
+  const overGoal = stats.goalUsd > 0 && stats.totalUsd >= stats.goalUsd
+
+  const paymentsListTotalPages = Math.max(
+    1,
+    Math.ceil(stats.paymentCount / stats.paymentsPageSize)
+  )
+  const paymentsPageDisplay = Math.min(
+    Math.max(1, paymentsListPage),
+    paymentsListTotalPages
+  )
+
+  return (
+    <div className="w-full text-left space-y-8">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+          <div>
+            <p
+              className="text-white/70 text-xs sm:text-sm font-semibold uppercase tracking-wide"
+              style={{ fontFamily: "Montserrat, sans-serif" }}
+            >
+              Recaudado (aportes confirmados)
+            </p>
+            <p
+              className="text-white text-2xl sm:text-3xl md:text-4xl font-black tabular-nums mt-1"
+              style={{ fontFamily: "Montserrat, sans-serif" }}
+            >
+              {formatUsdEs(stats.totalUsd)}
+            </p>
+          </div>
+          <div className="text-left sm:text-right">
+            <p
+              className="text-white/70 text-xs sm:text-sm font-semibold"
+              style={{ fontFamily: "Montserrat, sans-serif" }}
+            >
+              Meta publicada (etapa 1)
+            </p>
+            <p
+              className="text-white text-lg sm:text-xl font-bold tabular-nums mt-1"
+              style={{ fontFamily: "Montserrat, sans-serif" }}
+            >
+              {formatUsdEs(stats.goalUsd)}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Progress
+            value={barPercent}
+            className="h-3 sm:h-3.5 bg-white/15 rounded-full [&>[data-slot=progress-indicator]]:bg-gradient-to-r [&>[data-slot=progress-indicator]]:from-emerald-400 [&>[data-slot=progress-indicator]]:to-lime-300"
+          />
+          <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 text-xs sm:text-sm text-white/75">
+            <span style={{ fontFamily: "Montserrat, sans-serif" }}>
+              {stats.progressPercent}% de la meta
+            </span>
+            <span style={{ fontFamily: "Montserrat, sans-serif" }}>
+              {stats.paymentCount} pago{stats.paymentCount === 1 ? "" : "s"} ·{" "}
+              {stats.totalUnits} aporte{stats.totalUnits === 1 ? "" : "s"} (unidades)
+            </span>
+          </div>
+          {overGoal ? (
+            <p
+              className="text-emerald-200/95 text-sm font-semibold"
+              style={{ fontFamily: "Montserrat, sans-serif" }}
+            >
+              Se alcanzó la meta de esta etapa. Gracias a quienes ya sumaron.
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="border-t border-white/15 pt-6 space-y-3">
+        <h3
+          className="text-white text-base sm:text-lg font-black"
+          style={{ fontFamily: "Montserrat, sans-serif" }}
+        >
+          Pagos aprobados
+        </h3>
+        <p
+          className="text-white/65 text-xs sm:text-sm leading-relaxed"
+          style={{ fontFamily: "Montserrat, sans-serif" }}
+        >
+          Todos los pagos confirmados, con la cantidad de aportes incluidos en cada uno.
+        </p>
+        {stats.paymentCount === 0 ? (
+          <p
+            className="text-white/70 text-sm"
+            style={{ fontFamily: "Montserrat, sans-serif" }}
+          >
+            Todavía no hay pagos aprobados para mostrar.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            <div className="relative">
+              {listBusy ? (
+                <div
+                  className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-[#1a2e1a]/55 backdrop-blur-[2px]"
+                  aria-busy
+                  aria-label="Cargando página"
+                />
+              ) : null}
+              <ul
+                className={`rounded-xl border border-white/10 bg-black/20 divide-y divide-white/10 ${listBusy ? "opacity-60" : ""}`}
+                style={{ fontFamily: "Montserrat, sans-serif" }}
+              >
+                {(stats.payments ?? []).map((row, i) => (
+                  <li
+                    key={`${row.at}-${row.amountUsd}-${stats.paymentsPage}-${i}`}
+                    className="grid grid-cols-1 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_auto] gap-x-4 gap-y-2 px-3 sm:px-4 py-3 sm:py-3.5 text-sm sm:text-base items-start"
+                  >
+                    <div>
+                      {row.at ? (
+                        <p className="text-white/55 text-xs sm:text-sm tabular-nums">
+                          {formatFundingDate(row.at)}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="text-white/90">
+                      <p className="font-semibold">
+                        {row.quantity}{" "}
+                        {row.quantity === 1 ? "aporte" : "aportes"}
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right sm:min-w-[7.5rem]">
+                      <p className="text-white font-bold tabular-nums">
+                        {formatUsdEs(row.amountUsd)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {paymentsListTotalPages > 1 ? (
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p
+                  className="text-white/60 text-xs sm:text-sm text-center sm:text-left"
+                  style={{ fontFamily: "Montserrat, sans-serif" }}
+                >
+                  Página {paymentsPageDisplay} de {paymentsListTotalPages} ·{" "}
+                  {stats.paymentCount} pago{stats.paymentCount === 1 ? "" : "s"}
+                </p>
+                <div className="flex justify-center gap-2 sm:justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={paymentsPageDisplay <= 1 || listBusy}
+                    onClick={() => setPaymentsListPage((p) => Math.max(1, p - 1))}
+                    className="border-white/25 bg-white/5 text-white hover:bg-white/10 disabled:opacity-40"
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={
+                      paymentsPageDisplay >= paymentsListTotalPages || listBusy
+                    }
+                    onClick={() =>
+                      setPaymentsListPage((p) =>
+                        Math.min(paymentsListTotalPages, p + 1)
+                      )
+                    }
+                    className="border-white/25 bg-white/5 text-white hover:bg-white/10 disabled:opacity-40"
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 export default function ObjectivesParticipationSection() {
@@ -908,7 +1207,7 @@ export default function ObjectivesParticipationSection() {
           </motion.div>
         </motion.div>
 
-        {/* Sección Estadísticas — en construcción, preview visual del futuro dashboard */}
+        {/* Sección Estadísticas — recaudación pública */}
         <motion.div
           className="mt-10 sm:mt-14 md:mt-20 mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 12 }}
@@ -927,16 +1226,9 @@ export default function ObjectivesParticipationSection() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.5 }}
-            className="relative overflow-hidden rounded-2xl bg-[#1a2e1a]/60 border border-white/10 py-16 sm:py-20 md:py-24 px-6 sm:px-8 min-h-[280px] sm:min-h-[320px] flex items-center justify-center"
+            className="relative overflow-hidden rounded-2xl bg-[#1a2e1a]/60 border border-white/10 py-10 sm:py-14 md:py-16 px-5 sm:px-8 md:px-10 min-h-[240px] sm:min-h-[280px] flex items-center justify-center"
           >
-            <div className="text-center max-w-lg">
-              <p className="text-white text-base sm:text-lg md:text-xl font-medium drop-shadow-sm">
-                Acá vas a poder seguir el camino del proyecto: cuántos somos, cuánto falta y en qué punto estamos.
-              </p>
-              <p className="text-white/80 text-sm sm:text-base md:text-lg font-medium drop-shadow-sm mt-3">
-                Muy pronto esta sección va a estar disponible.
-              </p>
-            </div>
+            <FundingStatsPanel />
           </motion.div>
         </motion.div>
 

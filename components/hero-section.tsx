@@ -147,9 +147,9 @@ export function HeroSection() {
                   textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.7)'
                 }}
               >
-                Una transmisión hecha por los oyentes.{" "}
+                Llevemos a Víctor Hugo al Mundial 2026.{" "}
                 <br className="block" />
-                Relatada por <strong>Víctor Hugo Morales</strong>.
+                Financiado por los oyentes.
               </motion.p>
 
               {/* CTA Buttons */}
