@@ -22,8 +22,8 @@ export default function Home() {
         <Header />
         <HeroSection />
       </div>
-      <StorySection />
       <ObjectivesParticipationSection />
+      <StorySection />
       <ContactSection />
       <Footer />
     </main>

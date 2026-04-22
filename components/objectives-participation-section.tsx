@@ -1,39 +1,54 @@
-"use client"
+"use client";
 
-import React, { useState, useCallback } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import React, { useState, useCallback, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/components/ui/carousel"
-import { motion } from "framer-motion"
-import { createClient } from "@/lib/supabase/client"
-import { Progress } from "@/components/ui/progress"
+} from "@/components/ui/carousel";
+import { motion } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
+import { Progress } from "@/components/ui/progress";
+import { trackGaEvent } from "@/lib/analytics";
+import { SiMercadopago, SiPaypal } from "@icons-pack/react-simple-icons";
 
-type TeamMember = { firstName: string; lastName: string; image: string; bio: string }
+type TeamMember = {
+  firstName: string;
+  lastName: string;
+  image: string;
+  bio: string;
+};
 
 function EquipoSection({ teamMembers }: { teamMembers: TeamMember[] }) {
-  const [api, setApi] = useState<CarouselApi | undefined>(undefined)
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [api, setApi] = useState<CarouselApi | undefined>(undefined);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   React.useEffect(() => {
-    if (!api) return
-    const onSelect = () => setSelectedIndex(api.selectedScrollSnap())
-    onSelect()
-    api.on("select", onSelect)
+    if (!api) return;
+    const onSelect = () => setSelectedIndex(api.selectedScrollSnap());
+    onSelect();
+    api.on("select", onSelect);
     return () => {
-      api.off("select", onSelect)
-    }
-  }, [api])
+      api.off("select", onSelect);
+    };
+  }, [api]);
 
   return (
     <motion.div
@@ -88,7 +103,9 @@ function EquipoSection({ teamMembers }: { teamMembers: TeamMember[] }) {
               style={{ fontFamily: "Montserrat, sans-serif" }}
             >
               {person.bio.split("\n").map((line, i) => (
-                <span key={i} className="block">{line}</span>
+                <span key={i} className="block">
+                  {line}
+                </span>
               ))}
             </p>
           </motion.div>
@@ -135,7 +152,9 @@ function EquipoSection({ teamMembers }: { teamMembers: TeamMember[] }) {
                     style={{ fontFamily: "Montserrat, sans-serif" }}
                   >
                     {person.bio.split("\n").map((line, i) => (
-                      <span key={i} className="block">{line}</span>
+                      <span key={i} className="block">
+                        {line}
+                      </span>
                     ))}
                   </p>
                 </motion.div>
@@ -159,70 +178,70 @@ function EquipoSection({ teamMembers }: { teamMembers: TeamMember[] }) {
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
 
 type FundingPhase = {
-  id: string
-  sort_order: number
-  title: string
-  amount: string
-  description: string | null
-  items?: string[]
-  conclusion?: string
-}
+  id: string;
+  sort_order: number;
+  title: string;
+  amount: string;
+  description: string | null;
+  items?: string[];
+  conclusion?: string;
+};
 
 const DEFAULT_PHASES: FundingPhase[] = [
-  { 
-    id: "1", 
-    sort_order: 1, 
-    title: "ETAPA 1", 
-    amount: "250.000 USD", 
+  {
+    id: "1",
+    sort_order: 1,
+    title: "ETAPA 1",
+    amount: "250.000 USD",
     description: "Hacer posible la transmisión",
     items: [
       "Derechos de transmisión del Mundial 2026.",
       "Salida al aire por AM750 con Víctor Hugo.",
-      "Si se alcanza esta meta, El Último Mundial sucede."
-    ]
+      "Si se alcanza esta meta, El Último Mundial sucede.",
+    ],
   },
-  { 
-    id: "2", 
-    sort_order: 2, 
-    title: "ETAPA 2", 
-    amount: "250.000 USD", 
+  {
+    id: "2",
+    sort_order: 2,
+    title: "ETAPA 2",
+    amount: "250.000 USD",
     description: "Transmitir desde los estadios",
     items: [
       "Presencia en los estadios durante el Mundial.",
       "Logística, viajes y cobertura del equipo.",
-      "Si se alcanza esta meta, la experiencia se vive desde adentro."
-    ]
+      "Si se alcanza esta meta, la experiencia se vive desde adentro.",
+    ],
   },
-]
+];
 
-const MEMBROS_PATH = "/miembros"
+const MEMBROS_PATH = "/miembros";
 
 function getMembrosUrl(quantity: number) {
-  const q = Math.min(50, Math.max(1, quantity))
-  return `${MEMBROS_PATH}?quantity=${q}`
+  const q = Math.min(50, Math.max(1, quantity));
+  return `${MEMBROS_PATH}?quantity=${q}`;
 }
 
 type PublicFundingStats = {
-  goalUsd: number
-  totalUsd: number
-  totalUnits: number
-  paymentCount: number
-  progressPercent: number
-  payments: { amountUsd: number; quantity: number; at: string }[]
-  paymentsPage: number
-  paymentsPageSize: number
-  configured: boolean
-}
+  goalUsd: number;
+  totalUsd: number;
+  totalUnits: number;
+  paymentCount: number;
+  progressPercent: number;
+  payments: { amountUsd: number; quantity: number; at: string }[];
+  paymentsPage: number;
+  paymentsPageSize: number;
+  configured: boolean;
+};
 
 function formatUsdEs(value: number) {
   return `${value.toLocaleString("es-AR", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  })} USD`
+  })} USD`;
 }
 
 function formatFundingDate(iso: string) {
@@ -232,58 +251,62 @@ function formatFundingDate(iso: string) {
       month: "short",
       year: "numeric",
       timeZone: "America/Argentina/Buenos_Aires",
-    }).format(new Date(iso))
+    }).format(new Date(iso));
   } catch {
-    return ""
+    return "";
   }
 }
 
-const PAYMENTS_LIST_PAGE_SIZE = 5
+const PAYMENTS_LIST_PAGE_SIZE = 5;
 
 function FundingStatsPanel() {
-  const [stats, setStats] = React.useState<PublicFundingStats | null>(null)
-  const [loading, setLoading] = React.useState(true)
-  const [listBusy, setListBusy] = React.useState(false)
-  const [loadError, setLoadError] = React.useState(false)
-  const [paymentsListPage, setPaymentsListPage] = React.useState(1)
-  const isFirstFundingFetch = React.useRef(true)
+  const [stats, setStats] = React.useState<PublicFundingStats | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [listBusy, setListBusy] = React.useState(false);
+  const [loadError, setLoadError] = React.useState(false);
+  const [paymentsListPage, setPaymentsListPage] = React.useState(1);
+  const isFirstFundingFetch = React.useRef(true);
 
   React.useEffect(() => {
-    let cancelled = false
-    ;(async () => {
+    let cancelled = false;
+    (async () => {
       try {
         if (isFirstFundingFetch.current) {
-          setLoading(true)
+          setLoading(true);
         } else {
-          setListBusy(true)
+          setListBusy(true);
         }
         const params = new URLSearchParams({
           paymentsPage: String(paymentsListPage),
           paymentsPageSize: String(PAYMENTS_LIST_PAGE_SIZE),
-        })
-        const res = await fetch(`/api/public/funding-stats?${params.toString()}`)
-        const json = (await res.json()) as PublicFundingStats & { error?: string }
-        if (!res.ok) throw new Error("bad")
+        });
+        const res = await fetch(
+          `/api/public/funding-stats?${params.toString()}`,
+        );
+        const json = (await res.json()) as PublicFundingStats & {
+          error?: string;
+        };
+        if (!res.ok) throw new Error("bad");
         if (!cancelled) {
-          setStats(json)
+          setStats(json);
           if (json.configured && json.paymentsPage !== paymentsListPage) {
-            setPaymentsListPage(json.paymentsPage)
+            setPaymentsListPage(json.paymentsPage);
           }
         }
       } catch {
-        if (!cancelled) setLoadError(true)
+        if (!cancelled) setLoadError(true);
       } finally {
         if (!cancelled) {
-          setLoading(false)
-          setListBusy(false)
-          isFirstFundingFetch.current = false
+          setLoading(false);
+          setListBusy(false);
+          isFirstFundingFetch.current = false;
         }
       }
-    })()
+    })();
     return () => {
-      cancelled = true
-    }
-  }, [paymentsListPage])
+      cancelled = true;
+    };
+  }, [paymentsListPage]);
 
   if (loading) {
     return (
@@ -292,7 +315,7 @@ function FundingStatsPanel() {
         <div className="h-3 bg-white/10 rounded-full w-full" />
         <div className="h-28 bg-white/5 rounded-xl" />
       </div>
-    )
+    );
   }
 
   if (loadError || !stats) {
@@ -301,9 +324,10 @@ function FundingStatsPanel() {
         className="text-white/80 text-center text-sm sm:text-base max-w-lg mx-auto"
         style={{ fontFamily: "Montserrat, sans-serif" }}
       >
-        No pudimos cargar las estadísticas en este momento. Probá de nuevo más tarde.
+        No pudimos cargar las estadísticas en este momento. Probá de nuevo más
+        tarde.
       </p>
-    )
+    );
   }
 
   if (!stats.configured) {
@@ -319,24 +343,27 @@ function FundingStatsPanel() {
           className="text-white/75 text-sm sm:text-base"
           style={{ fontFamily: "Montserrat, sans-serif" }}
         >
-          Cuando el servidor esté configurado, vas a ver acá el avance y los últimos aportes confirmados.
+          Cuando el servidor esté configurado, vas a ver acá el avance y los
+          últimos aportes confirmados.
         </p>
       </div>
-    )
+    );
   }
 
   const barPercent =
-    stats.goalUsd > 0 ? Math.min(100, (stats.totalUsd / stats.goalUsd) * 100) : 0
-  const overGoal = stats.goalUsd > 0 && stats.totalUsd >= stats.goalUsd
+    stats.goalUsd > 0
+      ? Math.min(100, (stats.totalUsd / stats.goalUsd) * 100)
+      : 0;
+  const overGoal = stats.goalUsd > 0 && stats.totalUsd >= stats.goalUsd;
 
   const paymentsListTotalPages = Math.max(
     1,
-    Math.ceil(stats.paymentCount / stats.paymentsPageSize)
-  )
+    Math.ceil(stats.paymentCount / stats.paymentsPageSize),
+  );
   const paymentsPageDisplay = Math.min(
     Math.max(1, paymentsListPage),
-    paymentsListTotalPages
-  )
+    paymentsListTotalPages,
+  );
 
   return (
     <div className="w-full text-left space-y-8">
@@ -383,7 +410,8 @@ function FundingStatsPanel() {
             </span>
             <span style={{ fontFamily: "Montserrat, sans-serif" }}>
               {stats.paymentCount} pago{stats.paymentCount === 1 ? "" : "s"} ·{" "}
-              {stats.totalUnits} aporte{stats.totalUnits === 1 ? "" : "s"} (unidades)
+              {stats.totalUnits} aporte{stats.totalUnits === 1 ? "" : "s"}{" "}
+              (unidades)
             </span>
           </div>
           {overGoal ? (
@@ -408,7 +436,8 @@ function FundingStatsPanel() {
           className="text-white/65 text-xs sm:text-sm leading-relaxed"
           style={{ fontFamily: "Montserrat, sans-serif" }}
         >
-          Todos los pagos confirmados, con la cantidad de aportes incluidos en cada uno.
+          Todos los pagos confirmados, con la cantidad de aportes incluidos en
+          cada uno.
         </p>
         {stats.paymentCount === 0 ? (
           <p
@@ -473,7 +502,9 @@ function FundingStatsPanel() {
                     variant="outline"
                     size="sm"
                     disabled={paymentsPageDisplay <= 1 || listBusy}
-                    onClick={() => setPaymentsListPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      setPaymentsListPage((p) => Math.max(1, p - 1))
+                    }
                     className="border-white/25 bg-white/5 text-white hover:bg-white/10 disabled:opacity-40"
                   >
                     Anterior
@@ -487,7 +518,7 @@ function FundingStatsPanel() {
                     }
                     onClick={() =>
                       setPaymentsListPage((p) =>
-                        Math.min(paymentsListTotalPages, p + 1)
+                        Math.min(paymentsListTotalPages, p + 1),
                       )
                     }
                     className="border-white/25 bg-white/5 text-white hover:bg-white/10 disabled:opacity-40"
@@ -501,33 +532,100 @@ function FundingStatsPanel() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export default function ObjectivesParticipationSection() {
-  const router = useRouter()
-  const [quantity, setQuantity] = useState(10)
-  const [phases, setPhases] = useState<FundingPhase[]>(DEFAULT_PHASES)
-  const [authChecking, setAuthChecking] = useState(false)
+  const [quantity, setQuantity] = useState(10);
+  const [selectedOption, setSelectedOption] = useState<
+    "single" | "five" | "custom"
+  >("five");
+  const [phases, setPhases] = useState<FundingPhase[]>(DEFAULT_PHASES);
+  const [authChecking, setAuthChecking] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [checkoutProviderLoading, setCheckoutProviderLoading] = useState<
+    "mercadopago" | "paypal" | null
+  >(null);
   /** Solo para mostrar en UI. Backend usa 0.1 USD en pruebas. */
-  const contributionAmount = 18
-  const totalAmount = quantity * contributionAmount
+  const contributionAmount = 18;
+  const selectedQuantity =
+    selectedOption === "single" ? 1 : selectedOption === "five" ? 5 : quantity;
+  const totalAmount = selectedQuantity * contributionAmount;
+  const sliderValue = selectedQuantity === 1 ? 0 : selectedQuantity;
+  const lastTrackedSliderValue = useRef<number>(sliderValue);
 
-  const goToPay = useCallback(async (q: number) => {
-    setAuthChecking(true)
+  const openCheckoutModal = useCallback(async () => {
+    setCheckoutError(null);
+    trackGaEvent("vhm_pay_cta_click", {
+      selected_quantity: selectedQuantity,
+      selected_amount_usd: totalAmount,
+    });
+    setAuthChecking(true);
     try {
-      const client = createClient()
-      const { data: { user } } = await client.auth.getUser()
-      const targetUrl = getMembrosUrl(q)
-      if (!user) {
-        router.push("/registro?redirect=" + encodeURIComponent(targetUrl))
-        return
+      const client = createClient();
+      const {
+        data: { user },
+      } = await client.auth.getUser();
+      if (user?.email) {
+        setCheckoutEmail(user.email);
       }
-      router.push(targetUrl)
+      setCheckoutOpen(true);
     } finally {
-      setAuthChecking(false)
+      setAuthChecking(false);
     }
-  }, [router])
+  }, [selectedQuantity, totalAmount]);
+
+  const startCheckout = useCallback(
+    async (provider: "mercadopago" | "paypal") => {
+      const email = checkoutEmail.trim().toLowerCase();
+      const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!isValidEmail) {
+        setCheckoutError("Ingresá un email válido para continuar.");
+        return;
+      }
+
+      setCheckoutError(null);
+      trackGaEvent("vhm_pay_click", {
+        provider,
+        selected_quantity: selectedQuantity,
+        selected_amount_usd: totalAmount,
+      });
+      trackGaEvent("vhm_email_submitted", {
+        provider,
+        selected_quantity: selectedQuantity,
+        selected_amount_usd: totalAmount,
+      });
+      setCheckoutProviderLoading(provider);
+      try {
+        const response = await fetch("/api/create-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            quantity: selectedQuantity,
+            provider,
+            email,
+          }),
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data?.paymentUrl) {
+          setCheckoutError(
+            data?.error ?? "No pudimos iniciar el pago. Probá nuevamente.",
+          );
+          return;
+        }
+
+        window.location.href = data.paymentUrl;
+      } catch {
+        setCheckoutError("Error de conexión. Intentá nuevamente.");
+      } finally {
+        setCheckoutProviderLoading(null);
+      }
+    },
+    [checkoutEmail, selectedQuantity, totalAmount],
+  );
 
   // Fases hardcodeadas; conexión a BD comentada.
   // useEffect(() => {
@@ -554,7 +652,7 @@ export default function ObjectivesParticipationSection() {
         duration: 0.6,
       },
     },
-  }
+  };
 
   const fadeInVariants = {
     hidden: { opacity: 0 },
@@ -564,7 +662,7 @@ export default function ObjectivesParticipationSection() {
         duration: 0.6,
       },
     },
-  }
+  };
 
   const staggerContainerVariants = {
     hidden: { opacity: 0 },
@@ -575,7 +673,7 @@ export default function ObjectivesParticipationSection() {
         delayChildren: 0.1,
       },
     },
-  }
+  };
 
   const staggerItemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -586,7 +684,7 @@ export default function ObjectivesParticipationSection() {
         duration: 0.5,
       },
     },
-  }
+  };
 
   // Sin animación de opacidad para que el texto de fases no se vea transparente
   const phaseItemVariants = {
@@ -595,7 +693,7 @@ export default function ObjectivesParticipationSection() {
       y: 0,
       transition: { duration: 0.5 },
     },
-  }
+  };
 
   const slideInLeftVariants = {
     hidden: { opacity: 0, x: -50 },
@@ -606,7 +704,7 @@ export default function ObjectivesParticipationSection() {
         duration: 0.7,
       },
     },
-  }
+  };
 
   const slideInRightVariants = {
     hidden: { opacity: 0, x: 50 },
@@ -617,25 +715,40 @@ export default function ObjectivesParticipationSection() {
         duration: 0.7,
       },
     },
-  }
+  };
 
-  const linkClass = "text-white font-medium underline hover:no-underline"
+  const linkClass = "text-white font-medium underline hover:no-underline";
 
   const faqItems: { question: string; answer: React.ReactNode }[] = [
     {
       question: "¿Qué es El Último Mundial y de qué se trata este proyecto?",
       answer: (
         <>
-          <p>El Último Mundial es un <strong>proyecto colectivo</strong> para intentar que Víctor Hugo vuelva a relatar un Mundial. No desde un esquema tradicional, sino desde una <strong>comunidad que decide hacerlo posible</strong>.</p>
-          <p>La idea es transmitir el Mundial 2026 por AM750 y, si se puede ir un poco más lejos, estar también en los estadios para <strong>vivir el torneo desde adentro</strong> y contarlo desde ahí.</p>
+          <p>
+            El Último Mundial es un <strong>proyecto colectivo</strong> para
+            intentar que Víctor Hugo vuelva a relatar un Mundial. No desde un
+            esquema tradicional, sino desde una{" "}
+            <strong>comunidad que decide hacerlo posible</strong>.
+          </p>
+          <p>
+            La idea es transmitir el Mundial 2026 por AM750 y, si se puede ir un
+            poco más lejos, estar también en los estadios para{" "}
+            <strong>vivir el torneo desde adentro</strong> y contarlo desde ahí.
+          </p>
         </>
       ),
     },
     {
-      question: "¿Cómo puedo participar y qué significa \"ser parte\"?",
+      question: '¿Cómo puedo participar y qué significa "ser parte"?',
       answer: (
         <>
-          <p>Podés sumarte con un <strong>aporte único</strong> o <strong>aportar más de una vez</strong>. Ser parte significa participar de una idea que se construye entre muchos: no estás comprando un producto, estás formando parte de un <strong>proyecto colectivo</strong> para que una transmisión exista.</p>
+          <p>
+            Podés sumarte con un <strong>aporte único</strong> o{" "}
+            <strong>aportar más de una vez</strong>. Ser parte significa
+            participar de una idea que se construye entre muchos: no estás
+            comprando un producto, estás formando parte de un{" "}
+            <strong>proyecto colectivo</strong> para que una transmisión exista.
+          </p>
         </>
       ),
     },
@@ -643,8 +756,19 @@ export default function ObjectivesParticipationSection() {
       question: "¿Para qué se usa el dinero que se reúne?",
       answer: (
         <>
-          <p>El dinero que se junta se usa para cubrir los <strong>gastos de gestión</strong> y para comprar los <strong>derechos oficiales de transmisión radial</strong> de todos los partidos del Mundial, que hoy están en manos de una sola empresa.</p>
-          <p>Además, se destina a avanzar en los dos objetivos del proyecto: primero, hacer posible la transmisión del Mundial 2026; y después, si se puede, intentar estar también en los estadios para vivirlo desde adentro.</p>
+          <p>
+            El dinero que se junta se usa para cubrir los{" "}
+            <strong>gastos de gestión</strong> y para comprar los{" "}
+            <strong>derechos oficiales de transmisión radial</strong> de todos
+            los partidos del Mundial, que hoy están en manos de una sola
+            empresa.
+          </p>
+          <p>
+            Además, se destina a avanzar en los dos objetivos del proyecto:
+            primero, hacer posible la transmisión del Mundial 2026; y después,
+            si se puede, intentar estar también en los estadios para vivirlo
+            desde adentro.
+          </p>
         </>
       ),
     },
@@ -652,8 +776,16 @@ export default function ObjectivesParticipationSection() {
       question: "¿Qué pasa si no se llega a alguna de las etapas?",
       answer: (
         <>
-          <p>Si no se llega a alguna de las etapas, se van a buscar <strong>alternativas</strong> y esas alternativas se van a <strong>someter a votación entre todos los participantes</strong>. Lo que decida la mayoría es lo que se hace.</p>
-          <p>En cualquier caso, siempre va a estar disponible la opción de <strong>devolución total</strong>.</p>
+          <p>
+            Si no se llega a alguna de las etapas, se van a buscar{" "}
+            <strong>alternativas</strong> y esas alternativas se van a{" "}
+            <strong>someter a votación entre todos los participantes</strong>.
+            Lo que decida la mayoría es lo que se hace.
+          </p>
+          <p>
+            En cualquier caso, siempre va a estar disponible la opción de{" "}
+            <strong>devolución total</strong>.
+          </p>
         </>
       ),
     },
@@ -661,18 +793,85 @@ export default function ObjectivesParticipationSection() {
       question: "¿Quién impulsa este proyecto y qué relación tiene con Orsai?",
       answer: (
         <>
-          <p>El proyecto es impulsado por <a href="https://www.relatores.com.ar/" target="_blank" rel="noopener noreferrer" className="text-white font-medium underline hover:no-underline"><strong>Relatorxs</strong></a> junto a Víctor Hugo y su equipo, con el apoyo tecnológico de <strong>Orsai Tech</strong>. La transmisión está pensada para salir al aire por AM750, con el acompañamiento de la Asociación de Relatores del Fútbol Argentino.</p>
-          <p>El Último Mundial forma parte de <a href="https://proyecto18.org" target="_blank" rel="noopener noreferrer" className={linkClass}>Proyecto 18</a>, una iniciativa de Orsai Tech para que las audiencias no solo acompañen los contenidos, sino que también participen y sean parte de ellos. Orsai Tech es la empresa que crea y desarrolla los proyectos de <a href="https://orsai.org" target="_blank" rel="noopener noreferrer" className={linkClass}>Comunidad Orsai</a>, pensados para que la comunidad tenga un rol activo.</p>
-          <p>Más información en <a href="https://proyecto18.org" target="_blank" rel="noopener noreferrer" className={linkClass}>proyecto18.org</a> y <a href="https://orsai.org" target="_blank" rel="noopener noreferrer" className={linkClass}>orsai.org</a>.</p>
+          <p>
+            El proyecto es impulsado por{" "}
+            <a
+              href="https://www.relatores.com.ar/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white font-medium underline hover:no-underline"
+            >
+              <strong>Relatorxs</strong>
+            </a>{" "}
+            junto a Víctor Hugo y su equipo, con el apoyo tecnológico de{" "}
+            <strong>Orsai Tech</strong>. La transmisión está pensada para salir
+            al aire por AM750, con el acompañamiento de la Asociación de
+            Relatores del Fútbol Argentino.
+          </p>
+          <p>
+            El Último Mundial forma parte de{" "}
+            <a
+              href="https://proyecto18.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass}
+            >
+              Proyecto 18
+            </a>
+            , una iniciativa de Orsai Tech para que las audiencias no solo
+            acompañen los contenidos, sino que también participen y sean parte
+            de ellos. Orsai Tech es la empresa que crea y desarrolla los
+            proyectos de{" "}
+            <a
+              href="https://orsai.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass}
+            >
+              Comunidad Orsai
+            </a>
+            , pensados para que la comunidad tenga un rol activo.
+          </p>
+          <p>
+            Más información en{" "}
+            <a
+              href="https://proyecto18.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass}
+            >
+              proyecto18.org
+            </a>{" "}
+            y{" "}
+            <a
+              href="https://orsai.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass}
+            >
+              orsai.org
+            </a>
+            .
+          </p>
         </>
       ),
     },
     {
-      question: "¿Qué pasa si se llega a viajar a los estadios y cómo se sigue el proyecto?",
+      question:
+        "¿Qué pasa si se llega a viajar a los estadios y cómo se sigue el proyecto?",
       answer: (
         <>
-          <p>Si se alcanza la etapa que permite estar en los estadios, la idea es <strong>registrar todo el viaje para un posible documental</strong> y compartir <strong>material exclusivo</strong> con los participantes.</p>
-          <p>Quienes participen van a recibir novedades por email, van a tener un <strong>grupo de WhatsApp</strong> y acceso a información y contenido reservado durante todo el recorrido.</p>
+          <p>
+            Si se alcanza la etapa que permite estar en los estadios, la idea es{" "}
+            <strong>registrar todo el viaje para un posible documental</strong>{" "}
+            y compartir <strong>material exclusivo</strong> con los
+            participantes.
+          </p>
+          <p>
+            Quienes participen van a recibir novedades por email, van a tener un{" "}
+            <strong>grupo de WhatsApp</strong> y acceso a información y
+            contenido reservado durante todo el recorrido.
+          </p>
         </>
       ),
     },
@@ -680,7 +879,12 @@ export default function ObjectivesParticipationSection() {
       question: "¿Dónde se va a poder escuchar la transmisión?",
       answer: (
         <>
-          <p>La transmisión está pensada para salir al aire por <strong>AM750</strong> y por sus canales habituales. A medida que el proyecto avance, se va a ir contando con más detalle cómo seguir cada partido.</p>
+          <p>
+            La transmisión está pensada para salir al aire por{" "}
+            <strong>AM750</strong> y por sus canales habituales. A medida que el
+            proyecto avance, se va a ir contando con más detalle cómo seguir
+            cada partido.
+          </p>
         </>
       ),
     },
@@ -688,12 +892,19 @@ export default function ObjectivesParticipationSection() {
       question: "¿Y si tengo dudas o necesito escribirles?",
       answer: (
         <>
-          <p>Si tenés cualquier duda o querés hacer una consulta, podés escribirnos a:</p>
-          <p><a href="mailto:info@elultimomundial.com" className={linkClass}>info@elultimomundial.com</a></p>
+          <p>
+            Si tenés cualquier duda o querés hacer una consulta, podés
+            escribirnos a:
+          </p>
+          <p>
+            <a href="mailto:info@elultimomundial.com" className={linkClass}>
+              info@elultimomundial.com
+            </a>
+          </p>
         </>
       ),
     },
-  ]
+  ];
 
   const TEAM_MEMBERS: TeamMember[] = [
     {
@@ -732,21 +943,39 @@ export default function ObjectivesParticipationSection() {
       image: "/images/nestorcentra.png",
       bio: "Periodista deportivo con trayectoria en medios.\nCobertura, análisis y opinión sobre fútbol argentino.",
     },
-  ]
+  ];
 
-  const handleQuantityChange = (value: number) => {
-    const newQuantity = Math.max(1, Math.min(50, value))
-    setQuantity(newQuantity)
-  }
+  const handleSliderChange = (value: number) => {
+    const boundedValue = Math.max(0, Math.min(50, value));
+    const nextSelectedQuantity = boundedValue === 0 ? 1 : boundedValue;
+    if (lastTrackedSliderValue.current !== boundedValue) {
+      trackGaEvent("vhm_selector_moved", {
+        selected_quantity: nextSelectedQuantity,
+        selected_amount_usd: nextSelectedQuantity * contributionAmount,
+      });
+      lastTrackedSliderValue.current = boundedValue;
+    }
+    if (boundedValue === 0) {
+      setSelectedOption("single");
+      return;
+    }
+    if (boundedValue === 5) {
+      setSelectedOption("five");
+      return;
+    }
+    setSelectedOption("custom");
+    setQuantity(boundedValue);
+  };
 
   return (
-    <section 
+    <section
       className="relative py-12 px-4 sm:px-6 md:px-8 sm:py-16 md:py-24 overflow-hidden border-b border-white/10"
       style={{
-        backgroundImage: 'url(/images/6ffec3ae67d9dfd1c670aff771877f0f15df6d1c.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundImage:
+          "url(/images/6ffec3ae67d9dfd1c670aff771877f0f15df6d1c.jpg)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
       {/* Overlay oscuro para legibilidad del texto */}
@@ -767,7 +996,7 @@ export default function ObjectivesParticipationSection() {
           <motion.h2
             className="text-white mb-4 sm:mb-5 text-left font-montserrat font-black text-[32px] sm:text-[42px] md:text-[56px] leading-[105%] tracking-normal"
             style={{
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: "Montserrat, sans-serif",
             }}
             initial="hidden"
             whileInView="visible"
@@ -798,7 +1027,7 @@ export default function ObjectivesParticipationSection() {
                 </video>
               </div>
             </motion.div>
-            
+
             {/* Text Side */}
             <motion.div
               className="space-y-3 sm:space-y-4 order-2 md:order-2"
@@ -808,13 +1037,42 @@ export default function ObjectivesParticipationSection() {
               variants={staggerContainerVariants}
             >
               <p className="text-white text-base sm:text-lg md:text-xl leading-[1.6]">
-                Durante décadas, millones de personas compartimos <span className="font-bold text-white">goles, finales, alegrías y derrotas</span> con <span className="font-bold text-white">una misma voz</span>.
+                Durante décadas, millones de personas compartimos{" "}
+                <span className="font-bold text-white">
+                  goles, finales, alegrías y derrotas
+                </span>{" "}
+                con <span className="font-bold text-white">una misma voz</span>.
               </p>
               <p className="text-white text-base sm:text-lg md:text-xl leading-[1.6]">
-                Hoy esa voz puede volver a relatar un <span className="font-bold text-white">Mundial</span>. Pero no desde un esquema tradicional, sino desde algo mucho más <span className="font-bold text-white">raro y más lindo</span>: una <span className="font-bold text-white">comunidad que decide hacerlo posible</span>.
+                Hoy esa voz puede volver a relatar un{" "}
+                <span className="font-bold text-white">Mundial</span>. Pero no
+                desde un esquema tradicional, sino desde algo mucho más{" "}
+                <span className="font-bold text-white">raro y más lindo</span>:
+                una{" "}
+                <span className="font-bold text-white">
+                  comunidad que decide hacerlo posible
+                </span>
+                .
               </p>
               <p className="text-white text-base sm:text-lg md:text-xl leading-[1.6]">
-                El proyecto es <span className="font-bold text-white">simple y extraordinario</span> a la vez: que los <span className="font-bold text-white">oyentes</span> <span className="font-bold text-white">juntemos entre todos lo necesario</span> para comprar los <span className="font-bold text-white">derechos de transmisión del Mundial 2026</span> y volver a compartir los partidos de la <span className="font-bold text-white">Selección Argentina</span>.
+                El proyecto es{" "}
+                <span className="font-bold text-white">
+                  simple y extraordinario
+                </span>{" "}
+                a la vez: que los{" "}
+                <span className="font-bold text-white">oyentes</span>{" "}
+                <span className="font-bold text-white">
+                  juntemos entre todos lo necesario
+                </span>{" "}
+                para comprar los{" "}
+                <span className="font-bold text-white">
+                  derechos de transmisión del Mundial 2026
+                </span>{" "}
+                y volver a compartir los partidos de la{" "}
+                <span className="font-bold text-white">
+                  Selección Argentina
+                </span>
+                .
               </p>
             </motion.div>
           </div>
@@ -832,7 +1090,7 @@ export default function ObjectivesParticipationSection() {
           <motion.h2
             className="text-white mb-3 sm:mb-4 text-left font-montserrat font-black text-[32px] sm:text-[42px] md:text-[56px] leading-[105%] tracking-normal"
             style={{
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: "Montserrat, sans-serif",
             }}
             initial="hidden"
             whileInView="visible"
@@ -848,117 +1106,254 @@ export default function ObjectivesParticipationSection() {
             viewport={{ once: true }}
             variants={fadeInUpVariants}
           >
-            Podés sumarte con un <span className="font-bold text-white">aporte único</span> o <span className="font-bold text-white">aportar más de una vez</span>.
+            Podés sumarte con un{" "}
+            <span className="font-bold text-white">aporte único</span> o{" "}
+            <span className="font-bold text-white">aportar más de una vez</span>
+            .
             <br />
-            Así participás de un <span className="font-bold text-white">proyecto colectivo</span> para hacer posible la transmisión del <span className="font-bold text-white">Mundial 2026</span>.
+            Así participás de un{" "}
+            <span className="font-bold text-white">
+              proyecto colectivo
+            </span>{" "}
+            para hacer posible la transmisión del{" "}
+            <span className="font-bold text-white">Mundial 2026</span>.
           </motion.p>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 mb-16 sm:mb-20 md:mb-24"
+            className="flex flex-col gap-5 sm:gap-6 md:gap-7 mb-16 sm:mb-20 md:mb-24"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
             variants={staggerContainerVariants}
           >
-            {/* Aporte único */}
+            {/* Opción principal: planes múltiples */}
             <motion.div
-              className="p-5 sm:p-6 md:p-8 text-center flex flex-col relative overflow-hidden rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)]"
+              className="p-5 sm:p-6 md:p-8 text-center flex flex-col relative overflow-hidden rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-[#0f2012]/55 border border-white/20 shadow-[0px_24px_36px_0px_rgba(0,0,0,0.35)]"
               variants={staggerItemVariants}
             >
-              {/* Highlight vertical en el lado derecho */}
-              <div 
-                className="absolute right-0 top-0 bottom-0 w-1/4 pointer-events-none rounded-r-[16px] sm:rounded-r-[20px] md:rounded-r-[24px] bg-gradient-to-l from-white/10 via-white/5 to-transparent"
-              />
+              {/* Overlay sutil para profundidad */}
+              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_70%)]" />
               <div className="relative z-10 flex flex-col h-full min-h-[120px] sm:min-h-[140px] md:min-h-[150px]">
-              <p 
-                className="text-white mb-3 sm:mb-4 text-[24px] sm:text-[30px] md:text-[36px] leading-[105%] tracking-normal font-light"
-                style={{
-                  fontFamily: 'Montserrat, sans-serif',
-                }}
-              >
-                Aporte único
-              </p>
-              <p 
-                className="text-white mb-6 sm:mb-8 md:mb-10 text-[24px] sm:text-[30px] md:text-[36px] leading-[105%] tracking-normal font-bold"
-                style={{
-                  fontFamily: 'Montserrat, sans-serif',
-                }}
-              >
-                18 USD
-              </p>
-              <div className="mt-auto flex flex-col items-end gap-4">
-                <Button 
-                  type="button"
-                  disabled={authChecking}
-                  onClick={() => goToPay(1)}
-                  className="w-full font-semibold text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-10 sm:h-11 md:h-12"
-                  style={{
-                    background: 'linear-gradient(90deg, #CA0091 0%, #500062 100%)',
-                  }}
-                >
-                  {authChecking ? "…" : "QUIERO SER PARTE"}
-                </Button>
-                <p className="text-white/60 text-xs sm:text-sm text-center w-full">
-                  Una forma simple de ser parte.
-                </p>
-              </div>
-              </div>
-            </motion.div>
+                <div className="w-full mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+                    <button
+                      type="button"
+                      disabled={authChecking}
+                      onClick={() => setSelectedOption("single")}
+                      className={`rounded-[16px] p-4 text-left transition-all duration-200 border relative cursor-pointer ${
+                        selectedOption === "single"
+                          ? "bg-[linear-gradient(180deg,rgba(202,0,145,0.26),rgba(80,0,98,0.35))] text-white border-[#d946ef]/70 shadow-[0_12px_26px_rgba(202,0,145,0.3)]"
+                          : "bg-white/8 text-white hover:bg-white/14 border-white/25"
+                      }`}
+                    >
+                      <p
+                        className={`text-xs uppercase tracking-[0.08em] mb-1 ${selectedOption === "single" ? "text-white/80" : "text-white/60"}`}
+                      >
+                        Aporte base
+                      </p>
+                      <p className="text-[28px] sm:text-[32px] font-black leading-none">
+                        18
+                      </p>
+                      <p className="text-sm sm:text-base font-semibold mt-1">
+                        USD / 1 aporte
+                      </p>
+                      <p
+                        className={`mt-3 text-xs sm:text-sm ${selectedOption === "single" ? "text-white/85" : "text-white/70"}`}
+                      >
+                        Forma simple para sumarte hoy.
+                      </p>
+                      {selectedOption === "single" && (
+                        <span className="mt-3 inline-flex text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white uppercase tracking-[0.08em]">
+                          Seleccionado
+                        </span>
+                      )}
+                    </button>
 
-            {/* Hasta 10 aportes */}
-            <motion.div
-              className="p-5 sm:p-6 md:p-8 text-center flex flex-col relative overflow-hidden rounded-[16px] sm:rounded-[20px] md:rounded-[24px] backdrop-blur-[10px] bg-white/10 border border-white/20 shadow-[0px_20px_20px_0px_rgba(0,0,0,0.21)]"
-              variants={staggerItemVariants}
-            >
-              {/* Highlight vertical en el lado derecho */}
-              <div 
-                className="absolute right-0 top-0 bottom-0 w-1/4 pointer-events-none rounded-r-[16px] sm:rounded-r-[20px] md:rounded-r-[24px] bg-gradient-to-l from-white/10 via-white/5 to-transparent"
-              />
-              <div className="relative z-10 flex flex-col h-full min-h-[120px] sm:min-h-[140px] md:min-h-[150px]">
-              <p 
-                className="text-white mb-5 sm:mb-6 md:mb-8 text-[20px] sm:text-[28px] md:text-[36px] leading-[105%] tracking-normal font-light"
-                style={{
-                  fontFamily: 'Montserrat, sans-serif',
-                }}
-              >
-                <span className="font-bold">Aportar más de una vez</span>
-              </p>
-              <div className="mt-auto flex flex-col gap-5 w-full">
-                <div className="w-full">
+                    <button
+                      type="button"
+                      disabled={authChecking}
+                      onClick={() => setSelectedOption("five")}
+                      className={`rounded-[16px] p-4 text-left transition-all duration-200 relative border cursor-pointer ${
+                        selectedOption === "five"
+                          ? "bg-[linear-gradient(180deg,rgba(202,0,145,0.38),rgba(80,0,98,0.55))] text-white border-[#f0abfc]/75 shadow-[0_20px_40px_rgba(202,0,145,0.42)] scale-[1.03]"
+                          : "bg-white/8 text-white hover:bg-white/14 border-white/25 scale-[1.01]"
+                      }`}
+                    >
+                      <span className="absolute top-3 right-3 text-[10px] px-2 py-0.5 rounded-full bg-[#CA0091] text-white uppercase tracking-[0.08em]">
+                        Más elegido
+                      </span>
+                      <p
+                        className={`text-xs uppercase tracking-[0.08em] mb-1 ${selectedOption === "five" ? "text-white/90" : "text-white/60"}`}
+                      >
+                        Aporte recomendado
+                      </p>
+                      <p className="text-[30px] sm:text-[36px] font-black leading-none">
+                        90
+                      </p>
+                      <p className="text-sm sm:text-base font-semibold mt-1">
+                        USD / 5 aportes
+                      </p>
+                      <p
+                        className={`mt-3 text-xs sm:text-sm ${selectedOption === "five" ? "text-white/90" : "text-white/70"}`}
+                      >
+                        Más impacto para impulsar la meta.
+                      </p>
+                      {selectedOption === "five" && (
+                        <span className="mt-3 inline-flex text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white uppercase tracking-[0.08em]">
+                          Seleccionado
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={authChecking}
+                      onClick={() => setSelectedOption("custom")}
+                      className={`rounded-[16px] p-4 text-left transition-all duration-200 border relative cursor-pointer ${
+                        selectedOption === "custom"
+                          ? "bg-[linear-gradient(180deg,rgba(202,0,145,0.26),rgba(80,0,98,0.35))] text-white border-[#d946ef]/70 shadow-[0_12px_26px_rgba(202,0,145,0.3)]"
+                          : "bg-white/8 text-white hover:bg-white/14 border-white/25"
+                      }`}
+                    >
+                      <p
+                        className={`text-xs uppercase tracking-[0.08em] mb-1 ${selectedOption === "custom" ? "text-white/80" : "text-white/60"}`}
+                      >
+                        Aporte personalizado
+                      </p>
+                      <p className="text-[28px] sm:text-[32px] font-black leading-none">
+                        {quantity}
+                      </p>
+                      <p className="text-sm sm:text-base font-semibold mt-1">
+                        {quantity === 1 ? "aporte" : "aportes"} /{" "}
+                        {quantity * contributionAmount} USD
+                      </p>
+                      <p
+                        className={`mt-3 text-xs sm:text-sm ${selectedOption === "custom" ? "text-white/85" : "text-white/70"}`}
+                      >
+                        Definís tu nivel de participación.
+                      </p>
+                      {selectedOption === "custom" && (
+                        <span className="mt-3 inline-flex text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white uppercase tracking-[0.08em]">
+                          Seleccionado
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white/80 text-sm font-medium">
-                      {quantity} {quantity === 1 ? 'aporte' : 'aportes'}
+                    <span className="text-white text-xs sm:text-sm font-semibold">
+                      Seleccionado: {selectedQuantity}{" "}
+                      {selectedQuantity === 1 ? "aporte" : "aportes"} (
+                      {totalAmount} USD)
                     </span>
-                    <span className="text-white/50 text-xs font-normal">
-                      {totalAmount} USD
+                    <span className="text-white/70 text-xs sm:text-sm">
+                      50 aportes
                     </span>
                   </div>
                   <input
                     type="range"
-                    min={1}
+                    min={0}
                     max={50}
-                    value={quantity}
-                    onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
+                    step={5}
+                    value={sliderValue}
+                    onChange={(e) =>
+                      handleSliderChange(parseInt(e.target.value))
+                    }
                     className="w-full h-4 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
                     style={{
-                      background: `linear-gradient(to right, rgba(202, 0, 145, 0.8) 0%, rgba(202, 0, 145, 0.8) ${((quantity - 1) / 49) * 100}%, rgba(255, 255, 255, 0.2) ${((quantity - 1) / 49) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
+                      background: `linear-gradient(to right, rgba(202, 0, 145, 0.9) 0%, rgba(80, 0, 98, 0.9) ${(sliderValue / 50) * 100}%, rgba(255, 255, 255, 0.2) ${(sliderValue / 50) * 100}%, rgba(255, 255, 255, 0.2) 100%)`,
                     }}
                   />
                 </div>
-                <Button 
-                  type="button"
-                  disabled={authChecking}
-                  onClick={() => goToPay(quantity)}
-                  className="font-bold hover:bg-gray-100 bg-white text-black text-sm md:text-base px-4 md:px-6 py-3 md:py-3 h-12 md:h-12 transition-all duration-200 active:scale-95 touch-manipulation w-full"
-                >
-                  {authChecking ? "…" : `QUIERO APORTAR ${totalAmount} USD`}
-                </Button>
-              </div>
-                <p className="text-white/60 text-xs sm:text-sm text-center w-full mt-2">
-                  Podés aportar más de una vez si querés participar con mayor alcance.
-                </p>
+                <div className="mt-auto flex flex-col items-end gap-4">
+                  <Button
+                    type="button"
+                    disabled={authChecking}
+                    onClick={openCheckoutModal}
+                    className="w-full font-black text-white text-sm sm:text-base px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 h-11 sm:h-12 md:h-14 hover:brightness-110 transition-all duration-200 active:scale-[0.99]"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, #CA0091 0%, #500062 100%)",
+                    }}
+                  >
+                    {authChecking ? "…" : `QUIERO APORTAR ${totalAmount} USD`}
+                  </Button>
+                  <p className="text-white/65 text-xs sm:text-sm text-center w-full">
+                    Vas a ser redireccionado a Mercado Pago o PayPal para
+                    completar el aporte.
+                  </p>
+                </div>
               </div>
             </motion.div>
           </motion.div>
+
+          <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+            <DialogContent className="sm:max-w-md bg-[#101010] border-white/15 text-white">
+              <DialogHeader>
+                <DialogTitle>Finalizar aporte</DialogTitle>
+                <DialogDescription className="text-white/70">
+                  Ingresá tu email y tocá uno de los botones para continuar al
+                  pago.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="checkout-email" className="text-white/90">
+                    Email
+                  </Label>
+                  <Input
+                    id="checkout-email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="tu@email.com"
+                    value={checkoutEmail}
+                    onChange={(e) => setCheckoutEmail(e.target.value)}
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/45"
+                  />
+                </div>
+                {checkoutError && (
+                  <p className="text-sm text-red-300">{checkoutError}</p>
+                )}
+                <div className="grid grid-cols-1 gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => startCheckout("mercadopago")}
+                    disabled={checkoutProviderLoading !== null}
+                    className="w-full bg-[#009ee3] hover:bg-[#008ccc] text-white font-semibold justify-center gap-2 h-11"
+                  >
+                    {checkoutProviderLoading === "mercadopago" ? (
+                      "Redirigiendo..."
+                    ) : (
+                      <>
+                        <SiMercadopago
+                          className="size-4 shrink-0"
+                          aria-hidden
+                        />
+                        Pagar con Mercado Pago
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => startCheckout("paypal")}
+                    disabled={checkoutProviderLoading !== null}
+                    className="w-full bg-[#0070ba] hover:bg-[#005d99] text-white font-semibold justify-center gap-2 h-11"
+                  >
+                    {checkoutProviderLoading === "paypal" ? (
+                      "Redirigiendo..."
+                    ) : (
+                      <>
+                        <SiPaypal className="size-4 shrink-0" aria-hidden />
+                        Pagar con PayPal
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-white/55">
+                  Te vamos a redireccionar a la plataforma de pago elegida.
+                </p>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Metas y Fases en dos columnas */}
           <motion.div
@@ -971,25 +1366,38 @@ export default function ObjectivesParticipationSection() {
           >
             {/* Columna izquierda: Metas + Transmisión */}
             <motion.div variants={slideInLeftVariants} className="space-y-6">
-              <h3 
+              <h3
                 className="text-white mb-4 sm:mb-5 text-[28px] sm:text-[32px] md:text-[36px] leading-[105%] tracking-normal font-black"
                 style={{
-                  fontFamily: 'Montserrat, sans-serif',
+                  fontFamily: "Montserrat, sans-serif",
                 }}
               >
                 El objetivo
               </h3>
-              <p 
+              <p
                 className="text-white text-[18px] sm:text-[20px] md:text-[24px] leading-[1.6] tracking-normal font-normal"
                 style={{
-                  fontFamily: 'Montserrat, sans-serif',
+                  fontFamily: "Montserrat, sans-serif",
                 }}
               >
-                Este proyecto tiene <span className="font-bold text-white">dos grandes pasos</span>. Primero, <span className="font-bold text-white">hacer posible la transmisión</span>. Después, intentar <span className="font-bold text-white">llevarla más lejos</span>.
-                <br /><br />
-                Todo lo que se reúna se destina exclusivamente a eso: que el Mundial vuelva a escucharse y, si se puede, también a vivirlo <span className="font-bold text-white">desde adentro</span>.
-                <br /><br />
-                Es un recorrido que se construye <span className="font-bold text-white">entre todos</span>.
+                Este proyecto tiene{" "}
+                <span className="font-bold text-white">dos grandes pasos</span>.
+                Primero,{" "}
+                <span className="font-bold text-white">
+                  hacer posible la transmisión
+                </span>
+                . Después, intentar{" "}
+                <span className="font-bold text-white">llevarla más lejos</span>
+                .
+                <br />
+                <br />
+                Todo lo que se reúna se destina exclusivamente a eso: que el
+                Mundial vuelva a escucharse y, si se puede, también a vivirlo{" "}
+                <span className="font-bold text-white">desde adentro</span>.
+                <br />
+                <br />
+                Es un recorrido que se construye{" "}
+                <span className="font-bold text-white">entre todos</span>.
               </p>
             </motion.div>
 
@@ -1008,38 +1416,36 @@ export default function ObjectivesParticipationSection() {
                     className="flex items-start gap-4 sm:gap-6 md:gap-8 opacity-100"
                     variants={phaseItemVariants}
                   >
-                    <div 
-                      className="flex-shrink-0 flex items-center justify-center relative w-16 h-16 sm:w-20 sm:h-20 md:w-20 md:h-20"
-                    >
-                      <img 
-                        src="/images/Ellipse 49.png" 
-                        alt="" 
+                    <div className="flex-shrink-0 flex items-center justify-center relative w-16 h-16 sm:w-20 sm:h-20 md:w-20 md:h-20">
+                      <img
+                        src="/images/Ellipse 49.png"
+                        alt=""
                         className="absolute inset-0 w-full h-full object-contain"
                       />
-                      <span 
+                      <span
                         className="relative text-[48px] sm:text-[56px] md:text-[64px] leading-[128%] tracking-normal text-center font-bold text-white opacity-100"
                         style={{
-                          fontFamily: 'Montserrat, sans-serif',
-                          color: '#ffffff',
+                          fontFamily: "Montserrat, sans-serif",
+                          color: "#ffffff",
                         }}
                       >
                         {phase.sort_order}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0 opacity-100">
-                      <h4 
+                      <h4
                         className="mb-2 text-sm sm:text-base leading-[128%] tracking-normal font-normal text-white/60"
                         style={{
-                          fontFamily: 'Montserrat, sans-serif',
+                          fontFamily: "Montserrat, sans-serif",
                         }}
                       >
                         {phase.title} — {phase.amount}
                       </h4>
-                      <p 
+                      <p
                         className="mb-3 text-xl sm:text-2xl md:text-3xl leading-[128%] tracking-normal font-bold text-white opacity-100"
                         style={{
-                          fontFamily: 'Montserrat, sans-serif',
-                          color: '#ffffff',
+                          fontFamily: "Montserrat, sans-serif",
+                          color: "#ffffff",
                         }}
                       >
                         {phase.description ?? ""}
@@ -1047,12 +1453,12 @@ export default function ObjectivesParticipationSection() {
                       {phase.items && phase.items.length > 0 && (
                         <ul className="space-y-2 text-base sm:text-lg md:text-xl leading-[128%] tracking-normal font-normal opacity-90 text-white list-none">
                           {phase.items.map((item, index) => (
-                            <li 
+                            <li
                               key={index}
                               className="flex items-start"
                               style={{
-                                fontFamily: 'Montserrat, sans-serif',
-                                color: 'rgba(255, 255, 255, 0.9)',
+                                fontFamily: "Montserrat, sans-serif",
+                                color: "rgba(255, 255, 255, 0.9)",
                               }}
                             >
                               <span className="mr-2">–</span>
@@ -1148,60 +1554,41 @@ export default function ObjectivesParticipationSection() {
               CUÁNTOS NECESITAMOS SER
             </h2>
 
-            {/* OPCIÓN 1 — APORTE ÚNICO */}
-            <div
-              className="pb-6 sm:pb-8 border-b border-white/20 mb-6 sm:mb-8"
-              style={{ fontFamily: "Montserrat, sans-serif" }}
-            >
-              <h3
-                className="text-white mb-4 sm:mb-5 text-lg sm:text-xl font-black"
-                style={{ fontFamily: "Montserrat, sans-serif" }}
-              >
-                OPCIÓN 1 — APORTE ÚNICO
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4">
-                <div>
-                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Aporte:</p>
-                  <p className="text-white text-base sm:text-lg">18 USD por persona</p>
-                </div>
-                <div>
-                  <p className="text-white text-sm sm:text-base font-bold mb-1">Personas necesarias:</p>
-                  <p className="text-white text-xl sm:text-2xl font-bold">≈ 14.000 personas</p>
-                </div>
-                <div>
-                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Objetivo:</p>
-                  <p className="text-white text-base sm:text-lg">250.000 USD</p>
-                </div>
-              </div>
-              <p className="text-white/70 text-sm sm:text-base leading-relaxed">
-                Si cada persona participa una sola vez, necesitamos ser alrededor de catorce mil para llegar al primer objetivo.
-              </p>
-            </div>
-
-            {/* OPCIÓN 2 — APORTE MÚLTIPLE */}
+            {/* APORTE MÚLTIPLE */}
             <div style={{ fontFamily: "Montserrat, sans-serif" }}>
               <h3
                 className="text-white mb-4 sm:mb-5 text-lg sm:text-xl font-black"
                 style={{ fontFamily: "Montserrat, sans-serif" }}
               >
-                OPCIÓN 2 — APORTE MÚLTIPLE
+                APORTE MÚLTIPLE
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4">
                 <div>
-                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Aporte de referencia:</p>
-                  <p className="text-white text-base sm:text-lg">10 aportes</p>
+                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">
+                    Aporte de referencia:
+                  </p>
+                  <p className="text-white text-base sm:text-lg">3 aportes</p>
                 </div>
                 <div>
-                  <p className="text-white text-sm sm:text-base font-bold mb-1">Personas necesarias:</p>
-                  <p className="text-white text-xl sm:text-2xl font-bold">≈ 1.400 personas</p>
+                  <p className="text-white text-sm sm:text-base font-bold mb-1">
+                    Personas necesarias:
+                  </p>
+                  <p className="text-white text-xl sm:text-2xl font-bold">
+                    ≈ 4.700 personas
+                  </p>
                 </div>
                 <div>
-                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">Objetivo:</p>
+                  <p className="text-white/80 text-sm sm:text-base font-semibold mb-1">
+                    Objetivo:
+                  </p>
                   <p className="text-white text-base sm:text-lg">250.000 USD</p>
                 </div>
               </div>
               <p className="text-white/70 text-sm sm:text-base leading-relaxed">
-                Si algunas personas participan más de una vez, el número de personas necesarias baja. Con este escenario de referencia, alcanza con ser alrededor de mil cuatrocientas.
+                Si algunas personas participan más de una vez, el número de
+                personas necesarias baja de forma concreta. Con este escenario
+                de referencia, alcanza con ser alrededor de cuatro mil
+                setecientas.
               </p>
             </div>
           </motion.div>
@@ -1236,5 +1623,5 @@ export default function ObjectivesParticipationSection() {
         <EquipoSection teamMembers={TEAM_MEMBERS} />
       </div>
     </section>
-  )
+  );
 }

@@ -2,23 +2,35 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
 import Script from "next/script"
+import { Suspense } from "react"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
 import { JsonLd } from "@/components/seo/json-ld"
 import { MetaPixelPurchaseSimulator } from "@/components/meta-pixel-purchase-simulator"
+import { GoogleAnalytics } from "@/components/google-analytics"
 import "./globals.css"
 
 const META_PIXEL_ID = "1254030806288360"
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://elultimomundial.com"
+const DEFAULT_SITE_URL = "https://elultimomundial.com"
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL).trim()
+
+function getMetadataBase(url: string): URL {
+  try {
+    return new URL(url)
+  } catch {
+    return new URL(DEFAULT_SITE_URL)
+  }
+}
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: getMetadataBase(siteUrl),
   title: {
     default: "El Último Mundial - Victor Hugo Morales | Transmisión Mundial 2026 por los oyentes",
     template: "%s | El Último Mundial",
@@ -86,15 +98,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${montserrat.variable} font-sans antialiased`}>
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-554DL74QNN" />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-554DL74QNN');
-          `}
-        </Script>
+        <Suspense fallback={null}>
+          <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
+        </Suspense>
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
