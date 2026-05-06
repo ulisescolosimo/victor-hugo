@@ -258,6 +258,7 @@ function formatFundingDate(iso: string) {
 }
 
 const PAYMENTS_LIST_PAGE_SIZE = 5;
+const SHOW_FUNDING_STATS_SECTION = false;
 
 function FundingStatsPanel() {
   const [stats, setStats] = React.useState<PublicFundingStats | null>(null);
@@ -1594,30 +1595,32 @@ export default function ObjectivesParticipationSection() {
           </motion.div>
         </motion.div>
 
-        {/* Sección Estadísticas — recaudación pública */}
-        <motion.div
-          className="mt-10 sm:mt-14 md:mt-20 mb-6 sm:mb-8"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.4 }}
-        >
-          <h2
-            className="text-white mb-4 sm:mb-6 text-left font-montserrat font-black text-[28px] sm:text-[36px] md:text-[44px] leading-[105%] tracking-normal"
-            style={{ fontFamily: "Montserrat, sans-serif" }}
-          >
-            Estadísticas
-          </h2>
+        {SHOW_FUNDING_STATS_SECTION && (
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5 }}
-            className="relative overflow-hidden rounded-2xl bg-[#1a2e1a]/60 border border-white/10 py-10 sm:py-14 md:py-16 px-5 sm:px-8 md:px-10 min-h-[240px] sm:min-h-[280px] flex items-center justify-center"
+            className="mt-10 sm:mt-14 md:mt-20 mb-6 sm:mb-8"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.4 }}
           >
-            <FundingStatsPanel />
+            {/* Sección Estadísticas — recaudación pública */}
+            <h2
+              className="text-white mb-4 sm:mb-6 text-left font-montserrat font-black text-[28px] sm:text-[36px] md:text-[44px] leading-[105%] tracking-normal"
+              style={{ fontFamily: "Montserrat, sans-serif" }}
+            >
+              Estadísticas
+            </h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5 }}
+              className="relative overflow-hidden rounded-2xl bg-[#1a2e1a]/60 border border-white/10 py-10 sm:py-14 md:py-16 px-5 sm:px-8 md:px-10 min-h-[240px] sm:min-h-[280px] flex items-center justify-center"
+            >
+              <FundingStatsPanel />
+            </motion.div>
           </motion.div>
-        </motion.div>
+        )}
 
         {/* Equipo — rediseño: cercanía, caras protagonistas, no corporativo */}
         <EquipoSection teamMembers={TEAM_MEMBERS} />
